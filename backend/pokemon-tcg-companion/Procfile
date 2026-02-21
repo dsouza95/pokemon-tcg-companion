@@ -1,0 +1,2 @@
+api: uv run fastapi dev --port 8000
+flows: uv run python scripts/serve_flows.py

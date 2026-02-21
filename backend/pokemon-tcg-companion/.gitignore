@@ -1,0 +1,5 @@
+*.pyc
+.envrc
+.cursor
+.agents
+credentials.json

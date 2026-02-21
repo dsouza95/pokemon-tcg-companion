@@ -1,0 +1,3 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/pokemon-tcg-companion/.venv/bin/python"
+}

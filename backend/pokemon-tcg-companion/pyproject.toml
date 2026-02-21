@@ -1,0 +1,48 @@
+[project]
+name = "pokemon-tcg-companion"
+version = "0.1.0"
+description = "Pokemon TCG Collection Companion"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "asyncpg>=0.31.0",
+    "fastapi[standard-no-fastapi-cloud-cli]>=0.128.4",
+    "greenlet>=3.3.1",
+    "pydantic>=2.12.5",
+    "httpx>=0.24.0",
+    "sqlalchemy>=2.0.46",
+    "sqlmodel>=0.0.32",
+    "pydantic-settings>=2.12.0",
+    "google-cloud-storage>=2.10.0",
+    "google-cloud-pubsub>=2.16.0",
+    "pathvalidate>=3.3.1",
+    "prefect>=3.6.17",
+    "pydantic-ai-slim[google,logfire]>=1.62.0",
+    "logfire[fastapi]>=4.25.0",
+    "tcgdex-sdk>=2.2.1",
+]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "C", "I", "Q"]
+ignore = ["E203"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cards", "core"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[dependency-groups]
+dev = [
+    "alembic>=1.18.3",
+    "pre-commit>=4.5.1",
+    "pyright>=1.1.0",
+    "ruff>=0.15.0",
+    "pytest-asyncio>=0.22.0",
+    "prefect>=3.6.17",
+    "honcho>=2.0.0",
+]

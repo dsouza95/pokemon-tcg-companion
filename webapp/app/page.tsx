@@ -1,5 +1,5 @@
-"use server";
+import { redirect } from "next/navigation";
 
-export default async function Page() {
-  return "Pokemon TCG Companion";
+export default function Page() {
+  redirect("/cards");
 }

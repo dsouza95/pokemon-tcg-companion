@@ -1,18 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useCards } from "@/lib/hooks/useCards";
+import { useCards, useUploadCard } from "@/lib/hooks/useCards";
 import { useDelayedLoading } from "@/lib/hooks/useDelayedLoading";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CardGridSkeleton } from "./components/card-skeleton";
 import { Card } from "./components/card";
+import { UploadCardDialog } from "./components/upload-card-dialog";
 
 export default function CardsPage() {
   const { data: cards, isLoading, isError } = useCards();
   const showSkeleton = useDelayedLoading(isLoading);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { mutateAsync: uploadCard } = useUploadCard();
 
   return (
+    <>
+    <UploadCardDialog open={dialogOpen} onOpenChange={setDialogOpen} onUpload={uploadCard} />
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -23,7 +29,7 @@ export default function CardsPage() {
             </span>
           )}
         </div>
-        <Button>
+        <Button onClick={() => setDialogOpen(true)}>
           <HugeiconsIcon icon={Add01Icon} strokeWidth={2} className="w-4 h-4" />
           Add Card
         </Button>
@@ -40,7 +46,7 @@ export default function CardsPage() {
       {!isLoading && !showSkeleton && !isError && cards && cards.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 gap-4 text-muted-foreground">
           <p className="text-base">Your collection is empty.</p>
-          <Button>
+          <Button onClick={() => setDialogOpen(true)}>
             <HugeiconsIcon icon={Add01Icon} strokeWidth={2} className="w-4 h-4" />
             Add your first card
           </Button>
@@ -55,5 +61,6 @@ export default function CardsPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

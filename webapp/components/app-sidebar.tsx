@@ -2,16 +2,15 @@
 
 import {
   Sidebar,
+  SidebarContent,
   SidebarFooter,
   SidebarHeader
 } from "@/components/ui/sidebar";
 import { Cards02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { usePathname } from "next/navigation";
+import { NavUser } from "./nav-user";
 
 export function AppSidebar() {
-  const pathname = usePathname();
-
   return (
     <Sidebar>
       <SidebarHeader>
@@ -25,10 +24,10 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
+      <SidebarContent />
+
       <SidebarFooter>
-        <div className="px-2 py-1 text-xs text-muted-foreground text-center">
-          v0.1.0 Beta
-        </div>
+        <NavUser/>
       </SidebarFooter>
     </Sidebar>
   );

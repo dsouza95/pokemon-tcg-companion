@@ -80,6 +80,22 @@ Set CORS on the GCS bucket (required for direct browser uploads):
 uv run python scripts/set_bucket_cors.py
 ```
 
+#### Logfire (Observability)
+
+The backend ships with [Logfire](https://logfire.pydantic.dev/docs/) instrumentation. To send traces to your own project:
+
+1. Create a free account at <https://logfire.pydantic.dev>.
+2. Authenticate the CLI:
+   ```bash
+   uv run logfire auth
+   ```
+3. Link a project:
+   ```bash
+   uv run logfire projects use <your-project-name>
+   ```
+
+Without a token the app still starts — traces are simply discarded and a warning is logged. See the [Logfire first-steps guide](https://logfire.pydantic.dev/docs/guides/first-steps/) for more details.
+
 ### 3. Frontend
 
 ```bash

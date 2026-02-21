@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.logfire import setup_logfire
 from core.settings import settings
 from lifespan import lifespan
+from cards.interface.api import router as cards_router
 
 app = FastAPI(title="Pokémon TCG Companion", lifespan=lifespan)
 setup_logfire(fastapi_app=app)
@@ -18,6 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(cards_router)
 
 @app.get("/")
 async def root():

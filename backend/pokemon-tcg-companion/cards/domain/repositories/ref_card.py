@@ -18,3 +18,6 @@ class AbstractRefCardRepository(ABC):
 
     @abstractmethod
     async def update(self, id: UUID, card: RefCardUpdate) -> RefCard: ...
+
+    @abstractmethod
+    async def upsert_many(self, cards: Sequence[RefCardAdd]) -> None: ...

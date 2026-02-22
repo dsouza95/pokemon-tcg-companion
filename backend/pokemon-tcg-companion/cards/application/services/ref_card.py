@@ -23,3 +23,6 @@ class RefCardService:
 
     async def list_cards(self) -> Sequence[RefCard]:
         return await self.repo.list()
+
+    async def upsert_many_cards(self, cards: Sequence[RefCardAdd]) -> None:
+        return await self.repo.upsert_many(cards)

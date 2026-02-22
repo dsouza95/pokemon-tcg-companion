@@ -5,6 +5,7 @@ from typing import Optional, cast
 from uuid import UUID
 
 from sqlalchemy import update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
@@ -42,3 +43,25 @@ class RefCardRepository(AbstractRefCardRepository):
         updated_card = result.scalar_one()
         await self.session.commit()
         return updated_card
+
+    async def upsert_many(self, cards: Sequence[RefCardAdd]) -> None:
+        if not cards:
+            return
+
+        upserted_tcg_ids = set()
+        data = [] 
+        for card in cards:
+            data.append(card.model_dump())
+            upserted_tcg_ids.add(card.tcg_id)
+
+        stmt = pg_insert(RefCard).values(data)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["tcg_id"],
+            set_={col: stmt.excluded[col] for col in data[0] if col != "tcg_id"},
+        )
+        await self.session.execute(stmt)
+        await self.session.commit()
+
+        for obj in self.session.identity_map.values():
+            if isinstance(obj, RefCard) and obj.tcg_id in upserted_tcg_ids:
+                self.session.expire(obj)

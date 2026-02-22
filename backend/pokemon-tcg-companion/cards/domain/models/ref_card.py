@@ -10,14 +10,14 @@ class RefCardBase(SQLModel):
     tcg_id: str
     tcg_local_id: str
     name: str
-    image_url: str
+    image_url: Optional[str] = None
     set_id: str
     set_name: str
 
 
 class RefCard(RefCardBase, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    tcg_id: str = Field(index=True)
+    tcg_id: str = Field(index=True, unique=True)
     tcg_local_id: str = Field(index=True)
     set_id: str = Field(index=True)
 

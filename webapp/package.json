@@ -7,7 +7,12 @@
     "build": "next build",
     "openapi": "npx openapi-typescript lib/openapi.json --output ./lib/openapi-types.ts",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prepare": "cd .. && husky webapp/.husky"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,json,css,md}": "prettier --write",
+    "**/*.{ts,tsx}": "eslint --fix --max-warnings 0"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
@@ -34,6 +39,11 @@
     "eslint-config-next": "16.1.6",
     "openapi-typescript": "^7.12.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "eslint-plugin-simple-import-sort": "^12.0.0"
   }
 }

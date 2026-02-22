@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 interface UploadCardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpload: (file: File) => Promise<void>;
+  onUpload: (file: File) => Promise<unknown>;
 }
 
 export function UploadCardDialog({

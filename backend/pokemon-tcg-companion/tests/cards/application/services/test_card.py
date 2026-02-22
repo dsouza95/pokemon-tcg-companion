@@ -14,7 +14,8 @@ async def test_service(session):
         CardAdd(
             name="Charizard",
             tcg_id="base1-1",
-            image_url="https://assets.tcgdex.net/en/base/base1/1/high.png",
+            image_path="https://assets.tcgdex.net/en/base/base1/1/high.png",
+            user_id="user_test123",
         )
     )
 
@@ -22,13 +23,13 @@ async def test_service(session):
         card.id,
         CardUpdate(
             tcg_id="base1-4",
-            image_url="https://assets.tcgdex.net/en/base/base1/4/high.png",
+            image_path="https://assets.tcgdex.net/en/base/base1/4/high.png",
         ),
     )
 
     assert updated_card.tcg_id == "base1-4"
     assert (
-        updated_card.image_url == "https://assets.tcgdex.net/en/base/base1/4/high.png"
+        updated_card.image_path == "https://assets.tcgdex.net/en/base/base1/4/high.png"
     )
 
     # Retrieve and verify card data is persisted
@@ -38,7 +39,7 @@ async def test_service(session):
     assert retrieved_card.name == "Charizard"
     assert retrieved_card.tcg_id == "base1-4"
     assert (
-        retrieved_card.image_url == "https://assets.tcgdex.net/en/base/base1/4/high.png"
+        retrieved_card.image_path == "https://assets.tcgdex.net/en/base/base1/4/high.png"
     )
 
     # List cards and verify retrieved card is the only one

@@ -7,7 +7,8 @@ async function handler(req: NextRequest) {
   const { getToken } = await auth();
   const token = await getToken();
 
-  const path = req.nextUrl.pathname.replace(/^\/api/, "");
+  const path =
+    req.nextUrl.pathname.replace(/^\/api/, "").replace(/\/$/, "") || "/";
   const url = `${BACKEND_URL}${path}${req.nextUrl.search}`;
 
   const headers = new Headers(req.headers);

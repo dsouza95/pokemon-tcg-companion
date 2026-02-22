@@ -5,6 +5,47 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/cards/upload-url": {
+      "post": {
+        "tags": [
+          "cards"
+        ],
+        "summary": "Create Upload Url",
+        "operationId": "create_upload_url_cards_upload_url_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCardSignedUploadUrl"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/cards/": {
       "get": {
         "tags": [
@@ -39,7 +80,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CardAdd"
+                "$ref": "#/components/schemas/CardAddPayload"
               }
             }
           },
@@ -134,16 +175,34 @@
       "Card": {
         "properties": {
           "tcg_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Tcg Id"
           },
           "name": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Name"
           },
-          "image_url": {
+          "image_path": {
             "type": "string",
-            "title": "Image Url"
+            "title": "Image Path"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
           },
           "id": {
             "type": "string",
@@ -153,34 +212,63 @@
         },
         "type": "object",
         "required": [
-          "tcg_id",
-          "name",
-          "image_url"
+          "image_path",
+          "user_id"
         ],
         "title": "Card"
       },
-      "CardAdd": {
+      "CardAddPayload": {
         "properties": {
-          "tcg_id": {
+          "image_path": {
             "type": "string",
-            "title": "Tcg Id"
+            "title": "Image Path"
           },
           "name": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Name"
           },
-          "image_url": {
-            "type": "string",
-            "title": "Image Url"
+          "tcg_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tcg Id"
           }
         },
         "type": "object",
         "required": [
-          "tcg_id",
-          "name",
-          "image_url"
+          "image_path"
         ],
-        "title": "CardAdd"
+        "title": "CardAddPayload"
+      },
+      "CreateCardSignedUploadUrl": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "content_type"
+        ],
+        "title": "CreateCardSignedUploadUrl"
       },
       "HTTPValidationError": {
         "properties": {
@@ -194,6 +282,24 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "UploadUrlResponse": {
+        "properties": {
+          "upload_url": {
+            "type": "string",
+            "title": "Upload Url"
+          },
+          "image_path": {
+            "type": "string",
+            "title": "Image Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_url",
+          "image_path"
+        ],
+        "title": "UploadUrlResponse"
       },
       "ValidationError": {
         "properties": {

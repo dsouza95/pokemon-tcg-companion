@@ -15,7 +15,18 @@ export function useCards() {
   });
 }
 
-export function useUploadCard() {
+export function useCard(id: string) {
+  return useQuery<Card, Error>({
+    queryKey: ["card", id],
+    queryFn: async () => {
+      const res = await fetch(`/api/cards/${id}`);
+      if (!res.ok) throw new Error("Failed to fetch card");
+      return (await res.json()) as Card;
+    },
+  });
+}
+
+export function useCreateCard() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -26,7 +37,7 @@ export function useUploadCard() {
         body: JSON.stringify({ filename: file.name, content_type: file.type }),
       });
       if (!urlRes.ok) throw new Error("Failed to get upload URL");
-      const { upload_url } = await urlRes.json();
+      const { upload_url, image_path } = await urlRes.json();
 
       const uploadRes = await fetch(upload_url, {
         method: "PUT",
@@ -34,20 +45,17 @@ export function useUploadCard() {
         body: file,
       });
       if (!uploadRes.ok) throw new Error("Failed to upload image");
+
+      const cardRes = await fetch("/api/cards/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_path }),
+      });
+      if (!cardRes.ok) throw new Error("Failed to create card");
+      return (await cardRes.json()) as Card;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards"] });
-    },
-  });
-}
-
-export function useCard(id: string) {
-  return useQuery<Card, Error>({
-    queryKey: ["card", id],
-    queryFn: async () => {
-      const res = await fetch(`/api/cards/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch card");
-      return (await res.json()) as Card;
     },
   });
 }

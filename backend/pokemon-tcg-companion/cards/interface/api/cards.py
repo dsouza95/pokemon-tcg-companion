@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from google.cloud import pubsub_v1, storage
@@ -33,6 +33,13 @@ class CreateCardSignedUploadUrl(BaseModel):
 
 class UploadUrlResponse(BaseModel):
     upload_url: str
+    image_path: str
+
+
+class CardAddPayload(BaseModel):
+    image_path: str
+    name: Optional[str] = None
+    tcg_id: Optional[str] = None
 
 
 @router.post("/upload-url", response_model=UploadUrlResponse)
@@ -49,27 +56,32 @@ async def create_upload_url(
         method="PUT",
         content_type=payload.content_type,
     )
-    return UploadUrlResponse(upload_url=signed_url)
+    return UploadUrlResponse(upload_url=signed_url, image_path=object_name)
 
 
-@router.get("/", response_model=List[Card])
+@router.get("", response_model=List[Card])
 async def list_cards(session: AsyncSession = db_session):
     repo = CardRepository(session)
     svc = CardService(repo)
     return await svc.list_cards()
 
 
-@router.post("/", response_model=Card, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=Card, status_code=status.HTTP_201_CREATED)
 async def add_card(
-    payload: CardAdd,
-    publisher: Annotated[pubsub_v1.PublisherClient, Depends(get_publisher)],
+    payload: CardAddPayload,
+    auth_payload: Annotated[dict, Depends(require_auth)],
     session: AsyncSession = db_session,
 ):
+    user_id = auth_payload["sub"]
+    card_add = CardAdd(
+        image_path=payload.image_path,
+        name=payload.name,
+        tcg_id=payload.tcg_id,
+        user_id=user_id,
+    )
     repo = CardRepository(session)
     svc = CardService(repo)
-    card = await svc.add_card(payload)
-
-    return card
+    return await svc.add_card(card_add)
 
 
 @router.get("/{card_id}", response_model=Card)

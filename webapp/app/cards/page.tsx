@@ -5,7 +5,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useCards, useUploadCard } from "@/lib/hooks/useCards";
+import { useCards, useCreateCard } from "@/lib/hooks/useCards";
 import { useDelayedLoading } from "@/lib/hooks/useDelayedLoading";
 
 import { Card } from "./components/card";
@@ -16,7 +16,7 @@ export default function CardsPage() {
   const { data: cards, isLoading, isError } = useCards();
   const showSkeleton = useDelayedLoading(isLoading);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { mutateAsync: uploadCard } = useUploadCard();
+  const { mutateAsync: uploadCard } = useCreateCard();
 
   return (
     <>

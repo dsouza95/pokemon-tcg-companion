@@ -7,13 +7,15 @@ from sqlmodel import Field, SQLModel
 
 
 class CardBase(SQLModel):
-    tcg_id: str
-    name: str
-    image_url: str
+    tcg_id: Optional[str] = None
+    name: Optional[str] = None
+    image_path: str
+    user_id: str
 
 
 class Card(CardBase, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
+    user_id: str = Field(index=True)
 
 
 class CardAdd(CardBase):
@@ -23,4 +25,4 @@ class CardAdd(CardBase):
 class CardUpdate(SQLModel):
     tcg_id: Optional[str] = None
     name: Optional[str] = None
-    image_url: Optional[str] = None
+    image_path: Optional[str] = None

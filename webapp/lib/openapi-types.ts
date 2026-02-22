@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/cards/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Upload Url */
+        post: operations["create_upload_url_cards_upload_url_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cards/": {
         parameters: {
             query?: never;
@@ -63,30 +80,46 @@ export interface components {
         /** Card */
         Card: {
             /** Tcg Id */
-            tcg_id: string;
+            tcg_id?: string | null;
             /** Name */
-            name: string;
-            /** Image Url */
-            image_url: string;
+            name?: string | null;
+            /** Image Path */
+            image_path: string;
+            /** User Id */
+            user_id: string;
             /**
              * Id
              * Format: uuid
              */
             id?: string;
         };
-        /** CardAdd */
-        CardAdd: {
-            /** Tcg Id */
-            tcg_id: string;
+        /** CardAddPayload */
+        CardAddPayload: {
+            /** Image Path */
+            image_path: string;
             /** Name */
-            name: string;
-            /** Image Url */
-            image_url: string;
+            name?: string | null;
+            /** Tcg Id */
+            tcg_id?: string | null;
+        };
+        /** CreateCardSignedUploadUrl */
+        CreateCardSignedUploadUrl: {
+            /** Filename */
+            filename: string;
+            /** Content Type */
+            content_type: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** UploadUrlResponse */
+        UploadUrlResponse: {
+            /** Upload Url */
+            upload_url: string;
+            /** Image Path */
+            image_path: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -110,6 +143,39 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    create_upload_url_cards_upload_url_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCardSignedUploadUrl"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadUrlResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_cards_cards__get: {
         parameters: {
             query?: never;
@@ -139,7 +205,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CardAdd"];
+                "application/json": components["schemas"]["CardAddPayload"];
             };
         };
         responses: {

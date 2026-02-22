@@ -8,6 +8,7 @@
     "openapi": "npx openapi-typescript lib/openapi.json --output ./lib/openapi-types.ts",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
     "prepare": "cd .. && husky webapp/.husky"
   },
   "lint-staged": {

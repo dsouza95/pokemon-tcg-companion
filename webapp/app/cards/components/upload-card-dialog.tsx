@@ -1,6 +1,9 @@
 "use client";
 
+import { ImageUploadIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,8 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageUploadIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { cn } from "@/lib/utils";
 
 interface UploadCardDialogProps {
@@ -19,7 +20,11 @@ interface UploadCardDialogProps {
   onUpload: (file: File) => Promise<void>;
 }
 
-export function UploadCardDialog({ open, onOpenChange, onUpload }: UploadCardDialogProps) {
+export function UploadCardDialog({
+  open,
+  onOpenChange,
+  onUpload,
+}: UploadCardDialogProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -74,7 +79,7 @@ export function UploadCardDialog({ open, onOpenChange, onUpload }: UploadCardDia
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div
             className={cn(
-              "relative mx-auto flex w-36 shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors aspect-[2.5/3.5] overflow-hidden",
+              "relative mx-auto flex aspect-[2.5/3.5] w-36 shrink-0 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition-colors",
               isDragging
                 ? "border-foreground bg-muted"
                 : "border-muted-foreground/30 hover:border-muted-foreground/60",
@@ -88,13 +93,14 @@ export function UploadCardDialog({ open, onOpenChange, onUpload }: UploadCardDia
             onDrop={handleDrop}
           >
             {preview ? (
+              // eslint-disable-next-line @next/next/no-img-element -- blob URL from local file, not optimizable by next/image
               <img
                 src={preview}
                 alt="Card preview"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
-              <div className="flex flex-col items-center gap-1.5 text-muted-foreground px-2 text-center">
+              <div className="text-muted-foreground flex flex-col items-center gap-1.5 px-2 text-center">
                 <HugeiconsIcon
                   icon={ImageUploadIcon}
                   strokeWidth={1.5}

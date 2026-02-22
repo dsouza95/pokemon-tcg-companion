@@ -9,6 +9,7 @@ export function useDelayedLoading(isLoading: boolean, delayMs = 200): boolean {
 
   useEffect(() => {
     if (!isLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: immediately hide loading when done, only the show is delayed
       setShowLoading(false);
       return;
     }

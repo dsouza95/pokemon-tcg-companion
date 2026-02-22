@@ -1,31 +1,28 @@
-"use client"
+"use client";
 
+import { SignOutButton, useUser } from "@clerk/nextjs";
 import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar";
+  Logout05Icon,
+  MoreVerticalCircle01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    useSidebar,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { SignOutButton } from "@clerk/nextjs";
-import { Logout05Icon, MoreVerticalCircle01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from '@hugeicons/react';
-import { useUser } from "@clerk/nextjs";
 
 export function NavUser() {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
   const { isLoaded, isSignedIn, user } = useUser();
 
   if (!isLoaded || !isSignedIn || !user) {
@@ -47,12 +44,14 @@ export function NavUser() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.firstName}</span>
-                <span className="truncate text-xs">{user.primaryEmailAddress?.emailAddress}</span>
+                <span className="truncate text-xs">
+                  {user.primaryEmailAddress?.emailAddress}
+                </span>
               </div>
-            <HugeiconsIcon
+              <HugeiconsIcon
                 icon={MoreVerticalCircle01Icon}
                 className="size-4"
-            />
+              />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -62,17 +61,14 @@ export function NavUser() {
             sideOffset={4}
           >
             <SignOutButton>
-                <DropdownMenuItem>
-                    <HugeiconsIcon
-                        icon={Logout05Icon}
-                        className="size-4"
-                    />
-                    Log out
-                </DropdownMenuItem>
+              <DropdownMenuItem>
+                <HugeiconsIcon icon={Logout05Icon} className="size-4" />
+                Log out
+              </DropdownMenuItem>
             </SignOutButton>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

@@ -23,6 +23,7 @@ app.add_middleware(
 
 app.include_router(cards_router)
 
+
 @app.get("/", dependencies=[Depends(require_auth)])
 async def root():
     return {"message": "Pokémon TCG Companion"}

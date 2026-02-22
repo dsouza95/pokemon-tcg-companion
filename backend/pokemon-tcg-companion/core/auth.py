@@ -18,5 +18,5 @@ async def require_auth(request: Request) -> dict:
     )
     if not state.is_signed_in or state.payload is None:
         raise HTTPException(status_code=401, detail=state.message)
-    
+
     return state.payload

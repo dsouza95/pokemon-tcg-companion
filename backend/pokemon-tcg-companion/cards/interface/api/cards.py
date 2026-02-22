@@ -12,11 +12,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from cards.application.services.card import CardService
 from cards.domain.models.card import Card, CardAdd
 from cards.infrastructure.repositories.card import CardRepository
+from core.auth import require_auth
 from core.db import get_db
 from core.gcp import get_publisher, get_storage_client
 from core.settings import settings
 
-router = APIRouter(prefix="/cards", tags=["cards"])
+router = APIRouter(
+    prefix="/cards",
+    tags=["cards"],
+    dependencies=[Depends(require_auth)],
+)
 
 db_session = Depends(get_db)
 

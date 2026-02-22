@@ -5,6 +5,8 @@ from core.logfire import setup_logfire
 from core.settings import settings
 from lifespan import lifespan
 from cards.interface.api import router as cards_router
+from core.auth import require_auth
+from fastapi import Depends
 
 app = FastAPI(title="Pokémon TCG Companion", lifespan=lifespan)
 setup_logfire(fastapi_app=app)
@@ -21,6 +23,6 @@ app.add_middleware(
 
 app.include_router(cards_router)
 
-@app.get("/")
+@app.get("/", dependencies=[Depends(require_auth)])
 async def root():
     return {"message": "Pokémon TCG Companion"}

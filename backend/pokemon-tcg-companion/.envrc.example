@@ -2,6 +2,8 @@
 # Copy to .envrc and fill in your values
 export ALLOWED_ORIGINS=
 export BACKEND_URL=
+export CLERK_SECRET_KEY=
+export CLERK_AUTHORIZED_PARTY=http://localhost:3000
 export DATABASE_URL=
 export GCP_BUCKET=
 export GCP_PUBSUB_PROJECT=

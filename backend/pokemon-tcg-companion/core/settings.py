@@ -8,6 +8,8 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     allowed_origins: str = ""
     backend_url: str = "http://localhost:8000"
+    clerk_secret_key: str = ""
+    clerk_authorized_party: str = "http://localhost:3000"
     database_url: str = "sqlite+aiosqlite:///./test.db"
     default_agent_model: str = "google-gla:gemini-3-flash-preview"
     default_flow_retries: int = 3

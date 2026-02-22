@@ -21,6 +21,7 @@ dependencies = [
     "pydantic-ai-slim[google,logfire]>=1.62.0",
     "logfire[fastapi]>=4.25.0",
     "tcgdex-sdk>=2.2.1",
+    "clerk-backend-api>=5.0.2",
 ]
 
 [tool.ruff]

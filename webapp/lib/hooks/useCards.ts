@@ -8,7 +8,7 @@ export function useCards() {
   return useQuery<Card[], Error>({
     queryKey: ["cards"],
     queryFn: async () => {
-      const res = await fetch("/api/cards");
+      const res = await fetch("/api/cards/");
       if (!res.ok) throw new Error("Failed to fetch cards");
       return (await res.json()) as Card[];
     },

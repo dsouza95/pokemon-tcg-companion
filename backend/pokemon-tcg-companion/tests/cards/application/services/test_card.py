@@ -1,8 +1,8 @@
 import pytest
 
-from cards.application.services.card import CardService
-from cards.domain.models.card import CardAdd, CardUpdate
-from cards.infrastructure.repositories.card import CardRepository
+from cards.application.services import CardService, RefCardService
+from cards.domain.models import CardAdd, CardUpdate, RefCardAdd
+from cards.infrastructure.repositories import CardRepository, RefCardRepository
 
 
 @pytest.mark.asyncio
@@ -10,11 +10,23 @@ async def test_service(session):
     repo = CardRepository(session)
     svc = CardService(repo)
 
-    card = await svc.add_card(
-        CardAdd(
+    ref_card_repo = RefCardRepository(session)
+    ref_card_svc = RefCardService(ref_card_repo)
+
+    ref_card = await ref_card_svc.add_card(
+        RefCardAdd(
             name="Charizard",
             tcg_id="base1-1",
-            image_path="https://assets.tcgdex.net/en/base/base1/1/high.png",
+            tcg_local_id="1",
+            image_url="https://assets.tcgdex.net/en/base/base1/1/high.png",
+            set_id="base1",
+            set_name="Base Set",
+        )
+    )
+    card = await svc.add_card(
+        CardAdd(
+            ref_card_id=ref_card.id,
+            image_path="cards/charizard.png",
             user_id="user_test123",
         )
     )
@@ -22,25 +34,18 @@ async def test_service(session):
     updated_card = await svc.update_card(
         card.id,
         CardUpdate(
-            tcg_id="base1-4",
-            image_path="https://assets.tcgdex.net/en/base/base1/4/high.png",
+            image_path="cards/charizard-updated.png",
         ),
     )
 
-    assert updated_card.tcg_id == "base1-4"
-    assert (
-        updated_card.image_path == "https://assets.tcgdex.net/en/base/base1/4/high.png"
-    )
+    assert updated_card.image_path == "cards/charizard-updated.png"
 
     # Retrieve and verify card data is persisted
     retrieved_card = await svc.get_card(card.id)
     assert retrieved_card is not None
     assert retrieved_card.id == card.id
-    assert retrieved_card.name == "Charizard"
-    assert retrieved_card.tcg_id == "base1-4"
-    assert (
-        retrieved_card.image_path == "https://assets.tcgdex.net/en/base/base1/4/high.png"
-    )
+    assert retrieved_card.ref_card_id == ref_card.id
+    assert retrieved_card.image_path == "cards/charizard-updated.png"
 
     # List cards and verify retrieved card is the only one
     cards = await svc.list_cards()

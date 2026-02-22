@@ -4,8 +4,8 @@ from collections.abc import Sequence
 from typing import Optional
 from uuid import UUID
 
-from cards.domain.models.card import Card, CardAdd, CardUpdate
-from cards.domain.repositories.card import AbstractCardRepository
+from cards.domain.models import Card, CardAdd, CardUpdate
+from cards.domain.repositories import AbstractCardRepository
 
 
 class CardService:

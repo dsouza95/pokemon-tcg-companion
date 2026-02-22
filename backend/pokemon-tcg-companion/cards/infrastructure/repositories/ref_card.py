@@ -9,34 +9,34 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
 
-from cards.domain.models import Card, CardAdd, CardUpdate
-from cards.domain.repositories import AbstractCardRepository
+from cards.domain.models import RefCard, RefCardAdd, RefCardUpdate
+from cards.domain.repositories import AbstractRefCardRepository
 
 
-class CardRepository(AbstractCardRepository):
+class RefCardRepository(AbstractRefCardRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def add(self, card: CardAdd) -> Card:
-        new_card = Card(**card.model_dump())
+    async def add(self, card: RefCardAdd) -> RefCard:
+        new_card = RefCard(**card.model_dump())
         self.session.add(new_card)
         await self.session.commit()
         return new_card
 
-    async def get(self, id: UUID) -> Optional[Card]:
-        return await self.session.get(Card, id)
+    async def get(self, id: UUID) -> Optional[RefCard]:
+        return await self.session.get(RefCard, id)
 
-    async def list(self) -> Sequence[Card]:
-        q = await self.session.execute(select(Card))
+    async def list(self) -> Sequence[RefCard]:
+        q = await self.session.execute(select(RefCard))
         return q.scalars().all()
 
-    async def update(self, id: UUID, card: CardUpdate) -> Card:
+    async def update(self, id: UUID, card: RefCardUpdate) -> RefCard:
         values = card.model_dump(exclude_unset=True)
         stmt = (
-            update(Card)
-            .where(cast(ColumnElement[bool], Card.id == id))
+            update(RefCard)
+            .where(cast(ColumnElement[bool], RefCard.id == id))
             .values(values)
-            .returning(Card)
+            .returning(RefCard)
         )
         result = await self.session.execute(stmt)
         updated_card = result.scalar_one()

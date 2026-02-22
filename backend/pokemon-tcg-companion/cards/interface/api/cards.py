@@ -1,21 +1,21 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import Annotated, List, Optional
+from typing import Annotated, List
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from google.cloud import pubsub_v1, storage
+from google.cloud import storage
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from cards.application.services.card import CardService
-from cards.domain.models.card import Card, CardAdd
-from cards.infrastructure.repositories.card import CardRepository
+from cards.application.services import CardService
+from cards.domain.models import Card, CardAdd
+from cards.infrastructure.repositories import CardRepository
 from core.auth import require_auth
 from core.db import get_db
-from core.gcp import get_publisher, get_storage_client
+from core.gcp import get_storage_client
 from core.settings import settings
-from uuid import UUID, uuid4
 
 router = APIRouter(
     prefix="/cards",
@@ -38,8 +38,6 @@ class UploadUrlResponse(BaseModel):
 
 class CardAddPayload(BaseModel):
     image_path: str
-    name: Optional[str] = None
-    tcg_id: Optional[str] = None
 
 
 @router.post("/upload-url", response_model=UploadUrlResponse)
@@ -75,8 +73,6 @@ async def add_card(
     user_id = auth_payload["sub"]
     card_add = CardAdd(
         image_path=payload.image_path,
-        name=payload.name,
-        tcg_id=payload.tcg_id,
         user_id=user_id,
     )
     repo = CardRepository(session)

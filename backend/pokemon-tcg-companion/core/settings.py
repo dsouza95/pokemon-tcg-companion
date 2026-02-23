@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     default_flow_retry_delay_seconds: int = 10
     gcp_bucket: Optional[str] = None
     gcp_pubsub_project: str = "local-project"
+    google_application_credentials_json: Optional[str] = None
     prefect_deployment: str = "default"
     log_level: str = "INFO"
 

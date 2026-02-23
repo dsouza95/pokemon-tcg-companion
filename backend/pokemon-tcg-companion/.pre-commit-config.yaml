@@ -14,6 +14,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: uv-export
+        name: Export requirements.txt from uv.lock
+        entry: uv --directory backend/pokemon-tcg-companion export --frozen --no-dev --output-file requirements.txt
+        language: system
+        files: ^backend/pokemon-tcg-companion/(uv\.lock|pyproject\.toml)$
+        pass_filenames: false
+
       - id: pyright
         name: pyright
         entry: uv run --directory backend/pokemon-tcg-companion pyright

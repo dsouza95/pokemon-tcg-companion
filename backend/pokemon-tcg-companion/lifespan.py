@@ -10,7 +10,7 @@ from core.settings import settings
 def _get_gcp_credentials() -> service_account.Credentials | None:
     """Build GCP credentials from JSON setting if provided, otherwise use ADC.
 
-    On Fly.io set GOOGLE_APPLICATION_CREDENTIALS_JSON to the service account
+    In production, set GOOGLE_APPLICATION_CREDENTIALS_JSON to the service account
     JSON content. Locally, leave it unset and use GOOGLE_APPLICATION_CREDENTIALS
     (file path) or `gcloud auth application-default login` as usual.
     """

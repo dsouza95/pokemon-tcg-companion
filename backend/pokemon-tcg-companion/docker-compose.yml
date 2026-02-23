@@ -51,15 +51,6 @@ services:
     volumes:
       - pubsub_data:/data
 
-  redis:
-    image: redis:7
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
 volumes:
   db_data:
   pubsub_data:

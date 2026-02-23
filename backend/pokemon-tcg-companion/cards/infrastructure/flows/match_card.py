@@ -23,7 +23,7 @@ from core.db import with_session
 from core.flows import with_logfire
 from core.settings import settings
 
-FLOW_NAME = "match-card"
+FLOW_NAME = "match_card_flow"
 
 
 @task(

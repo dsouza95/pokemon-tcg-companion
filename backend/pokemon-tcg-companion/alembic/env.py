@@ -7,10 +7,11 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlmodel import SQLModel
 
 from alembic import context
+from core.db import _normalize_async_url
 from core.settings import settings
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", _normalize_async_url(settings.database_url))
 
 
 def load_models(package_names: list[str]) -> None:

@@ -11,9 +11,10 @@ from core.settings import settings
 def _normalize_async_url(url: str) -> str:
     """Normalize a database URL to use asyncpg.
 
-    Handles two common cases when using hosted providers like Neon:
+    Handles common cases when using hosted providers like Neon:
     - 'postgresql://' or 'postgres://' → 'postgresql+asyncpg://'
     - 'sslmode=require' (libpq syntax) → 'ssl=require' (asyncpg syntax)
+    - 'channel_binding=require' stripped (asyncpg does not support this param)
     """
     url = url.replace("postgres://", "postgresql://", 1)
     if "postgresql+asyncpg://" not in url:
@@ -23,12 +24,17 @@ def _normalize_async_url(url: str) -> str:
     params = parse_qs(parsed.query, keep_blank_values=True)
     if "sslmode" in params:
         params["ssl"] = params.pop("sslmode")
-        url = urlunparse(parsed._replace(query=urlencode(params, doseq=True)))
+    params.pop("channel_binding", None)
+    url = urlunparse(parsed._replace(query=urlencode(params, doseq=True)))
 
     return url
 
 
-engine = create_async_engine(_normalize_async_url(settings.database_url), future=True, echo=False)
+engine = create_async_engine(
+    _normalize_async_url(settings.database_url),
+    future=True,
+    echo=False,
+)
 AsyncSessionMaker = async_sessionmaker(engine, expire_on_commit=False)
 
 T = TypeVar("T")

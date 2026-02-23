@@ -39,7 +39,7 @@ The project is split into two services:
 - [pnpm](https://pnpm.io/) — Node package manager
 - [Docker](https://www.docker.com/) — for local infrastructure
 - A Google Cloud project with Storage and Pub/Sub enabled
-- An AI provider (we use Google Gemini by default)
+- An AI provider (we use Open router by default)
 
 
 

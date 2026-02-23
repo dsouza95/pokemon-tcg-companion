@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     clerk_secret_key: str = ""
     clerk_authorized_party: str = "http://localhost:3000"
     database_url: str = "sqlite+aiosqlite:///./test.db"
-    default_agent_model: str = "google-gla:gemini-3-flash-preview"
+    default_agent_model: str = "google-gla:gemini-2.5-flash"
     default_flow_retries: int = 3
     default_flow_retry_delay_seconds: int = 10
     gcp_bucket: Optional[str] = None

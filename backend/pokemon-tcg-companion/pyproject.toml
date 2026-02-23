@@ -18,10 +18,10 @@ dependencies = [
     "google-cloud-pubsub>=2.16.0",
     "pathvalidate>=3.3.1",
     "prefect>=3.6.17",
-    "pydantic-ai-slim[google,logfire]>=1.62.0",
     "logfire[fastapi]>=4.25.0",
     "tcgdex-sdk>=2.2.1",
     "clerk-backend-api>=5.0.2",
+    "pydantic-ai-slim[google,logfire]>=1.62.0",
 ]
 
 [tool.ruff]
@@ -29,7 +29,7 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "C", "I", "Q"]
-ignore = ["E203"]
+ignore = ["E203", "E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["cards", "core"]

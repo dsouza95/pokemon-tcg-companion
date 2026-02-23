@@ -1,22 +1,56 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Optional, cast
+from typing import Optional, Self, cast
 from uuid import UUID
 
-from sqlalchemy import update
+from sqlalchemy import func, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import ColumnElement
+from sqlalchemy.sql import ColumnElement, Select
 from sqlmodel import select
 
 from cards.domain.models import RefCard, RefCardAdd, RefCardUpdate
 from cards.domain.repositories import AbstractRefCardRepository
 
 
+class RefCardQuery:
+    def __init__(self, session: AsyncSession) -> None:
+        self._session = session
+        self._stmt: Select = select(RefCard)
+
+    def by_set_id(self, set_id: str) -> Self:
+        self._stmt = self._stmt.where(
+            cast(ColumnElement[bool], RefCard.set_id == set_id)
+        )
+        return self
+
+    def by_local_id(self, local_id: str) -> Self:
+        self._stmt = self._stmt.where(
+            cast(ColumnElement[bool], RefCard.tcg_local_id == local_id)
+        )
+        return self
+
+    def by_name(self, name: str, threshold: float = 0.3, limit: int = 20) -> Self:
+        similarity = func.similarity(RefCard.name, name)
+        self._stmt = (
+            self._stmt.where(cast(ColumnElement[bool], similarity > threshold))
+            .order_by(similarity.desc())
+            .limit(limit)
+        )
+        return self
+
+    async def all(self) -> Sequence[RefCard]:
+        result = await self._session.execute(self._stmt)
+        return result.scalars().all()
+
+
 class RefCardRepository(AbstractRefCardRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+
+    def query(self) -> RefCardQuery:
+        return RefCardQuery(self.session)
 
     async def add(self, card: RefCardAdd) -> RefCard:
         new_card = RefCard(**card.model_dump())
@@ -49,7 +83,7 @@ class RefCardRepository(AbstractRefCardRepository):
             return
 
         upserted_tcg_ids = set()
-        data = [] 
+        data = []
         for card in cards:
             data.append(card.model_dump())
             upserted_tcg_ids.add(card.tcg_id)
@@ -65,3 +99,18 @@ class RefCardRepository(AbstractRefCardRepository):
         for obj in self.session.identity_map.values():
             if isinstance(obj, RefCard) and obj.tcg_id in upserted_tcg_ids:
                 self.session.expire(obj)
+
+    async def search_by_set_id_and_local_id(
+        self, set_id: str, local_id: str
+    ) -> Sequence[RefCard]:
+        return await self.query().by_set_id(set_id).by_local_id(local_id).all()
+
+    async def search_by_set_id_and_name(
+        self, set_id: str, name: str, limit: int = 20
+    ) -> Sequence[RefCard]:
+        return await self.query().by_set_id(set_id).by_name(name, limit=limit).all()
+
+    async def search_by_local_id_and_name(
+        self, local_id: str, name: str, limit: int = 20
+    ) -> Sequence[RefCard]:
+        return await self.query().by_local_id(local_id).by_name(name, limit=limit).all()

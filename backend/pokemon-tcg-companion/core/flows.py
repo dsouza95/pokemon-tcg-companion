@@ -1,7 +1,9 @@
 import functools
+import inspect
 from collections.abc import Callable
 from typing import Any
 
+import logfire
 from prefect.deployments import arun_deployment, run_deployment
 
 from core.logfire import setup_logfire
@@ -22,7 +24,13 @@ def with_logfire(
         @functools.wraps(f)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             setup_logfire(pydantic_ai=pydantic_ai)
-            return await f(*args, **kwargs)
+            sig = inspect.signature(f)
+            bound = sig.bind(*args, **kwargs)
+            bound.apply_defaults()
+            with logfire.span(f.__name__, **bound.arguments):
+                result = await f(*args, **kwargs)
+                logfire.info(f"{f.__name__} completed", result=result)
+                return result
 
         return wrapper
 

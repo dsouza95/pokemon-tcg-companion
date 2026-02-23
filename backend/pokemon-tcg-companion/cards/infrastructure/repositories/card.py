@@ -6,6 +6,7 @@ from uuid import UUID
 
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import QueryableAttribute, selectinload
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
 
@@ -27,8 +28,10 @@ class CardRepository(AbstractCardRepository):
         return await self.session.get(Card, id)
 
     async def list(self) -> Sequence[Card]:
-        q = await self.session.execute(select(Card))
-        return q.scalars().all()
+        stmt = select(Card).options(
+            selectinload(cast(QueryableAttribute, Card.ref_card))
+        )
+        return (await self.session.execute(stmt)).scalars().all()
 
     async def update(self, id: UUID, card: CardUpdate) -> Card:
         values = card.model_dump(exclude_unset=True)

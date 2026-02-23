@@ -1,20 +1,22 @@
 from __future__ import annotations
 
+import asyncio
+import json
 from datetime import timedelta
 from typing import Annotated, List
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from google.cloud import storage
+from google.cloud import pubsub_v1, storage
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cards.application.services import CardService
-from cards.domain.models import Card, CardAdd
+from cards.domain.models import Card, CardAdd, CardRead
 from cards.infrastructure.repositories import CardRepository
 from core.auth import require_auth
 from core.db import get_db
-from core.gcp import get_storage_client
+from core.gcp import get_publisher, get_storage_client
 from core.settings import settings
 
 router = APIRouter(
@@ -36,8 +38,11 @@ class UploadUrlResponse(BaseModel):
     image_path: str
 
 
-class CardAddPayload(BaseModel):
+class CreateCardPayload(BaseModel):
     image_path: str
+
+
+CARD_CREATED_TOPIC = "card-created"
 
 
 @router.post("/upload-url", response_model=UploadUrlResponse)
@@ -57,7 +62,7 @@ async def create_upload_url(
     return UploadUrlResponse(upload_url=signed_url, image_path=object_name)
 
 
-@router.get("", response_model=List[Card])
+@router.get("", response_model=List[CardRead])
 async def list_cards(session: AsyncSession = db_session):
     repo = CardRepository(session)
     svc = CardService(repo)
@@ -66,8 +71,9 @@ async def list_cards(session: AsyncSession = db_session):
 
 @router.post("", response_model=Card, status_code=status.HTTP_201_CREATED)
 async def add_card(
-    payload: CardAddPayload,
+    payload: CreateCardPayload,
     auth_payload: Annotated[dict, Depends(require_auth)],
+    publisher: Annotated[pubsub_v1.PublisherClient, Depends(get_publisher)],
     session: AsyncSession = db_session,
 ):
     user_id = auth_payload["sub"]
@@ -77,10 +83,18 @@ async def add_card(
     )
     repo = CardRepository(session)
     svc = CardService(repo)
-    return await svc.add_card(card_add)
+
+    card = await svc.add_card(card_add)
+
+    topic_payload = json.dumps(card.model_dump(mode="json")).encode("utf-8")
+    topic_path = publisher.topic_path(settings.gcp_pubsub_project, CARD_CREATED_TOPIC)
+    future = await asyncio.to_thread(publisher.publish, topic_path, topic_payload)
+    await asyncio.to_thread(future.result)
+
+    return card
 
 
-@router.get("/{card_id}", response_model=Card)
+@router.get("/{card_id}", response_model=CardRead)
 async def get_card(card_id: UUID, session: AsyncSession = db_session):
     repo = CardRepository(session)
     svc = CardService(repo)

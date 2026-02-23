@@ -1,12 +1,11 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from cards.interface.api import router as cards_router
+from core.auth import require_auth
 from core.logfire import setup_logfire
 from core.settings import settings
 from lifespan import lifespan
-from cards.interface.api import router as cards_router
-from core.auth import require_auth
-from fastapi import Depends
 
 app = FastAPI(title="Pokémon TCG Companion", lifespan=lifespan)
 setup_logfire(fastapi_app=app)

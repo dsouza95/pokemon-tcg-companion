@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cards/": {
+    "/cards": {
         parameters: {
             query?: never;
             header?: never;
@@ -29,10 +29,10 @@ export interface paths {
             cookie?: never;
         };
         /** List Cards */
-        get: operations["list_cards_cards__get"];
+        get: operations["list_cards_cards_get"];
         put?: never;
         /** Add Card */
-        post: operations["add_card_cards__post"];
+        post: operations["add_card_cards_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -50,6 +50,23 @@ export interface paths {
         get: operations["get_card_cards__card_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cards/webhooks/card-created": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Handle Card Created */
+        post: operations["handle_card_created_cards_webhooks_card_created_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -79,28 +96,37 @@ export interface components {
     schemas: {
         /** Card */
         Card: {
-            /** Tcg Id */
-            tcg_id?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Image Path */
-            image_path: string;
+            /** Ref Card Id */
+            ref_card_id?: string | null;
             /** User Id */
             user_id: string;
+            /** Image Path */
+            image_path: string;
             /**
              * Id
              * Format: uuid
              */
             id?: string;
         };
-        /** CardAddPayload */
-        CardAddPayload: {
+        /** CardRead */
+        CardRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Ref Card Id */
+            ref_card_id?: string | null;
+            /** User Id */
+            user_id: string;
             /** Image Path */
             image_path: string;
-            /** Name */
-            name?: string | null;
-            /** Tcg Id */
-            tcg_id?: string | null;
+            ref_card?: components["schemas"]["RefCardRead"] | null;
+        };
+        /** CreateCardPayload */
+        CreateCardPayload: {
+            /** Image Path */
+            image_path: string;
         };
         /** CreateCardSignedUploadUrl */
         CreateCardSignedUploadUrl: {
@@ -113,6 +139,47 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * PubSubEnvelope
+         * @description Pub/Sub push subscription envelope.
+         */
+        PubSubEnvelope: {
+            message: components["schemas"]["PubSubMessage"];
+            /** Subscription */
+            subscription: string;
+        };
+        /**
+         * PubSubMessage
+         * @description Pub/Sub message structure.
+         */
+        PubSubMessage: {
+            /** Data */
+            data: string;
+            /** Messageid */
+            messageId: string;
+            /** Publishtime */
+            publishTime: string;
+        };
+        /** RefCardRead */
+        RefCardRead: {
+            /** Tcg Id */
+            tcg_id: string;
+            /** Tcg Local Id */
+            tcg_local_id: string;
+            /** Name */
+            name: string;
+            /** Image Url */
+            image_url?: string | null;
+            /** Set Id */
+            set_id: string;
+            /** Set Name */
+            set_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
         };
         /** UploadUrlResponse */
         UploadUrlResponse: {
@@ -176,7 +243,7 @@ export interface operations {
             };
         };
     };
-    list_cards_cards__get: {
+    list_cards_cards_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -191,12 +258,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Card"][];
+                    "application/json": components["schemas"]["CardRead"][];
                 };
             };
         };
     };
-    add_card_cards__post: {
+    add_card_cards_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -205,7 +272,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CardAddPayload"];
+                "application/json": components["schemas"]["CreateCardPayload"];
             };
         };
         responses: {
@@ -247,6 +314,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Card"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    handle_card_created_cards_webhooks_card_created_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PubSubEnvelope"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

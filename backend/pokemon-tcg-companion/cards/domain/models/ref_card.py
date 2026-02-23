@@ -22,6 +22,10 @@ class RefCard(RefCardBase, table=True):
     set_id: str = Field(index=True)
 
 
+class RefCardRead(RefCardBase):
+    id: UUID
+
+
 class RefCardAdd(RefCardBase):
     pass
 

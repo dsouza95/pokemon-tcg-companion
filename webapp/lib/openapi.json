@@ -46,13 +46,13 @@
         }
       }
     },
-    "/cards/": {
+    "/cards": {
       "get": {
         "tags": [
           "cards"
         ],
         "summary": "List Cards",
-        "operationId": "list_cards_cards__get",
+        "operationId": "list_cards_cards_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -60,10 +60,10 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Card"
+                    "$ref": "#/components/schemas/CardRead"
                   },
                   "type": "array",
-                  "title": "Response List Cards Cards  Get"
+                  "title": "Response List Cards Cards Get"
                 }
               }
             }
@@ -75,12 +75,12 @@
           "cards"
         ],
         "summary": "Add Card",
-        "operationId": "add_card_cards__post",
+        "operationId": "add_card_cards_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CardAddPayload"
+                "$ref": "#/components/schemas/CreateCardPayload"
               }
             }
           },
@@ -153,6 +153,45 @@
         }
       }
     },
+    "/cards/webhooks/card-created": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Handle Card Created",
+        "operationId": "handle_card_created_cards_webhooks_card_created_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PubSubEnvelope"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Root",
@@ -174,35 +213,25 @@
     "schemas": {
       "Card": {
         "properties": {
-          "tcg_id": {
+          "ref_card_id": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Tcg Id"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "image_path": {
-            "type": "string",
-            "title": "Image Path"
+            "title": "Ref Card Id"
           },
           "user_id": {
             "type": "string",
             "title": "User Id"
+          },
+          "image_path": {
+            "type": "string",
+            "title": "Image Path"
           },
           "id": {
             "type": "string",
@@ -212,45 +241,69 @@
         },
         "type": "object",
         "required": [
-          "image_path",
-          "user_id"
+          "user_id",
+          "image_path"
         ],
         "title": "Card"
       },
-      "CardAddPayload": {
+      "CardRead": {
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "ref_card_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ref Card Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
           "image_path": {
             "type": "string",
             "title": "Image Path"
           },
-          "name": {
+          "ref_card": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/RefCardRead"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Name"
-          },
-          "tcg_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tcg Id"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "image_path"
+        ],
+        "title": "CardRead"
+      },
+      "CreateCardPayload": {
+        "properties": {
+          "image_path": {
+            "type": "string",
+            "title": "Image Path"
           }
         },
         "type": "object",
         "required": [
           "image_path"
         ],
-        "title": "CardAddPayload"
+        "title": "CreateCardPayload"
       },
       "CreateCardSignedUploadUrl": {
         "properties": {
@@ -282,6 +335,98 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "PubSubEnvelope": {
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/PubSubMessage"
+          },
+          "subscription": {
+            "type": "string",
+            "title": "Subscription"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "subscription"
+        ],
+        "title": "PubSubEnvelope",
+        "description": "Pub/Sub push subscription envelope."
+      },
+      "PubSubMessage": {
+        "properties": {
+          "data": {
+            "type": "string",
+            "title": "Data"
+          },
+          "messageId": {
+            "type": "string",
+            "title": "Messageid"
+          },
+          "publishTime": {
+            "type": "string",
+            "title": "Publishtime"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "messageId",
+          "publishTime"
+        ],
+        "title": "PubSubMessage",
+        "description": "Pub/Sub message structure."
+      },
+      "RefCardRead": {
+        "properties": {
+          "tcg_id": {
+            "type": "string",
+            "title": "Tcg Id"
+          },
+          "tcg_local_id": {
+            "type": "string",
+            "title": "Tcg Local Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "set_id": {
+            "type": "string",
+            "title": "Set Id"
+          },
+          "set_name": {
+            "type": "string",
+            "title": "Set Name"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tcg_id",
+          "tcg_local_id",
+          "name",
+          "set_id",
+          "set_name",
+          "id"
+        ],
+        "title": "RefCardRead"
       },
       "UploadUrlResponse": {
         "properties": {

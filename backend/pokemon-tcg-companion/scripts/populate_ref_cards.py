@@ -68,7 +68,7 @@ async def main(set_id: str | None = None) -> None:
             *[populate_set(tcgdex, sid) for sid in batch],
             return_exceptions=True,
         )
-        for sid, result in zip(batch, results):
+        for sid, result in zip(batch, results, strict=True):
             if isinstance(result, BaseException):
                 print(f"  '{sid}' failed: {result}")
             else:

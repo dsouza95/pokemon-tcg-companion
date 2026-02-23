@@ -2,26 +2,26 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { components } from "@/lib/openapi-types";
 
-type Card = components["schemas"]["Card"];
+type CardRead = components["schemas"]["CardRead"];
 
 export function useCards() {
-  return useQuery<Card[], Error>({
+  return useQuery<CardRead[], Error>({
     queryKey: ["cards"],
     queryFn: async () => {
       const res = await fetch("/api/cards/");
       if (!res.ok) throw new Error("Failed to fetch cards");
-      return (await res.json()) as Card[];
+      return (await res.json()) as CardRead[];
     },
   });
 }
 
 export function useCard(id: string) {
-  return useQuery<Card, Error>({
+  return useQuery<CardRead, Error>({
     queryKey: ["card", id],
     queryFn: async () => {
       const res = await fetch(`/api/cards/${id}`);
       if (!res.ok) throw new Error("Failed to fetch card");
-      return (await res.json()) as Card;
+      return (await res.json()) as CardRead;
     },
   });
 }
@@ -52,7 +52,7 @@ export function useCreateCard() {
         body: JSON.stringify({ image_path }),
       });
       if (!cardRes.ok) throw new Error("Failed to create card");
-      return (await cardRes.json()) as Card;
+      return (await cardRes.json()) as CardRead;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards"] });

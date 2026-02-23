@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from fastapi import HTTPException, Request
 from clerk_backend_api import Clerk
 from clerk_backend_api.security.types import AuthenticateRequestOptions
+from fastapi import HTTPException, Request
 
 from core.settings import settings
 

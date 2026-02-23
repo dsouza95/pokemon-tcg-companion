@@ -21,3 +21,18 @@ class AbstractRefCardRepository(ABC):
 
     @abstractmethod
     async def upsert_many(self, cards: Sequence[RefCardAdd]) -> None: ...
+
+    @abstractmethod
+    async def search_by_set_id_and_local_id(
+        self, set_id: str, local_id: str
+    ) -> Sequence[RefCard]: ...
+
+    @abstractmethod
+    async def search_by_set_id_and_name(
+        self, set_id: str, name: str, limit: int = 20
+    ) -> Sequence[RefCard]: ...
+
+    @abstractmethod
+    async def search_by_local_id_and_name(
+        self, local_id: str, name: str, limit: int = 20
+    ) -> Sequence[RefCard]: ...

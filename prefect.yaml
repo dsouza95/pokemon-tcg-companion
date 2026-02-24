@@ -6,9 +6,6 @@ pull:
       id: clone-step
       repository: https://github.com/dsouza95/pokemon-tcg-companion
       branch: main
-  - prefect.deployments.steps.pip_install_requirements:
-      directory: "{{ clone-step.directory }}/backend/pokemon-tcg-companion"
-      requirements_file: requirements.txt
   - prefect.deployments.steps.run_shell_script:
       script: pip install "{{ clone-step.directory }}/backend/pokemon-tcg-companion"
 

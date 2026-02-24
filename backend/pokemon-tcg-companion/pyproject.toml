@@ -43,6 +43,9 @@ known-first-party = ["cards", "core"]
 [tool.ruff.format]
 quote-style = "double"
 
+[tool.setuptools]
+py-modules = ["flows"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["cards*", "core*", "alembic*"]

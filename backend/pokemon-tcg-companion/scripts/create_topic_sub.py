@@ -8,7 +8,7 @@ Backend URL can be passed as argument or read from settings.
 Usage:
     python scripts/create_topic_sub.py \\
         --topic topic \\
-        --subscription topic-sub \\
+        --sub topic-sub \\
         --push-endpoint http://host.docker.internal:8000/my-endpoint
 """
 
@@ -64,12 +64,12 @@ def main():
         help="Topic name (e.g., topic)",
     )
     parser.add_argument(
-        "--subscription",
+        "--sub",
         required=True,
         help="Subscription name (e.g., topic-sub)",
     )
     parser.add_argument(
-        "--push-endpoint",
+        "--endpoint",
         required=True,
         help="Push endpoint (e.g., http://host.docker.internal:8000/my-endpoint)",
     )
@@ -78,8 +78,8 @@ def main():
 
     create_topic_and_subscription(
         topic_name=args.topic,
-        subscription_name=args.subscription,
-        push_endpoint=args.push_endpoint,
+        subscription_name=args.sub,
+        push_endpoint=args.endpoint,
     )
 
 

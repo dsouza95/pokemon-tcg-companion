@@ -134,6 +134,10 @@ pnpm dev
 
 The app is available at `http://localhost:3000`.
 
+## Demo
+
+A demo of the full application (frontend and backend) is available at https://pokemon-tcg-companion-beta.vercel.app/cards. Because the demo is hosted exclusively on free-tier services, it may be slower than a production deployment or temporarily unavailable.
+
 ## Development
 
 ### Backend

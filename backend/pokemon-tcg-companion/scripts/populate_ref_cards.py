@@ -19,7 +19,7 @@ from tcgdexsdk import TCGdex
 from cards.application.services import RefCardService
 from cards.domain.models import RefCardAdd
 from cards.infrastructure.repositories import RefCardRepository
-from core.db import AsyncSessionMaker
+from core.db import get_session_maker
 
 
 async def populate_set(tcgdex: TCGdex, set_id: str) -> int:
@@ -41,7 +41,8 @@ async def populate_set(tcgdex: TCGdex, set_id: str) -> int:
         for card in set_data.cards
     ]
 
-    async with AsyncSessionMaker() as session:
+    session_maker = get_session_maker()
+    async with session_maker() as session:
         svc = RefCardService(RefCardRepository(session))
         await svc.upsert_many_cards(cards)
 

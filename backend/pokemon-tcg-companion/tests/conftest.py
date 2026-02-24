@@ -138,5 +138,5 @@ async def mock_flow_db(session):
     async def mock_session_maker():
         yield session
 
-    with patch("core.db.AsyncSessionMaker", return_value=mock_session_maker()):
+    with patch("core.db.get_session_maker", return_value=mock_session_maker):
         yield

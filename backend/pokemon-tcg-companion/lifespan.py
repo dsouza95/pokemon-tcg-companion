@@ -7,6 +7,7 @@ from google.oauth2 import service_account
 
 from core.settings import settings
 
+
 def _get_gcp_credentials() -> service_account.Credentials | None:
     """Build GCP credentials from JSON setting if provided, otherwise use ADC.
 
@@ -16,7 +17,7 @@ def _get_gcp_credentials() -> service_account.Credentials | None:
     """
     if not settings.google_application_credentials_json:
         return None
-    
+
     info = json.loads(settings.google_application_credentials_json)
     return service_account.Credentials.from_service_account_info(
         info,

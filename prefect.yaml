@@ -1,0 +1,25 @@
+name: pokemon-tcg-companion
+prefect-version: 3.6.17
+
+pull:
+  - prefect.deployments.steps.git_clone:
+      id: clone-step
+      repository: https://github.com/dsouza95/pokemon-tcg-companion
+      branch: main
+  - prefect.deployments.steps.pip_install_requirements:
+      directory: "{{ clone-step.directory }}/backend/pokemon-tcg-companion"
+      requirements_file: requirements.txt
+  - prefect.deployments.steps.run_shell_script:
+      script: pip install "{{ clone-step.directory }}/backend/pokemon-tcg-companion"
+
+deployments:
+  - name: default
+    entrypoint: backend/pokemon-tcg-companion/cards/infrastructure/flows/match_card.py:match_card_flow
+    work_pool:
+      name: default-work-pool
+      job_variables:
+        env:
+          DATABASE_URL: "{{ prefect.blocks.secret.pokemon-tcg-database-url }}"
+          GOOGLE_API_KEY: "{{ prefect.blocks.secret.pokemon-tcg-google-api-key }}"
+          LOGFIRE_TOKEN: "{{ prefect.blocks.secret.pokemon-tcg-logfire-token }}"
+          GCP_BUCKET: "{{ prefect.variables.pokemon-tcg-gcp-bucket }}"

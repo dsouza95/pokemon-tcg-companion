@@ -5,7 +5,7 @@ from fastapi import FastAPI
 def setup_logfire(
     *, pydantic_ai: bool = False, fastapi_app: FastAPI | None = None
 ) -> None:
-    logfire.configure()
+    logfire.configure(send_to_logfire="if-token-present")
 
     if pydantic_ai:
         logfire.instrument_pydantic_ai()

@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import os
 from typing import AsyncGenerator, Awaitable, Callable, TypeVar
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from core.settings import settings
 
+_engine: AsyncEngine | None = None
+_session_maker: async_sessionmaker | None = None
+
+T = TypeVar("T")
 
 def _normalize_async_url(url: str) -> str:
     """Normalize a database URL to use asyncpg.
@@ -29,22 +35,27 @@ def _normalize_async_url(url: str) -> str:
 
     return url
 
+def get_engine() -> AsyncEngine:
+    global _engine
+    if _engine is None:
+        url = _normalize_async_url(os.environ.get("DATABASE_URL", settings.database_url))
+        _engine = create_async_engine(url, future=True, echo=False)
 
-engine = create_async_engine(
-    _normalize_async_url(settings.database_url),
-    future=True,
-    echo=False,
-)
-AsyncSessionMaker = async_sessionmaker(engine, expire_on_commit=False)
+    return _engine
 
-T = TypeVar("T")
-
+def get_session_maker() -> async_sessionmaker:
+    global _session_maker
+    if _session_maker is None:
+        _session_maker = async_sessionmaker(get_engine(), expire_on_commit=False)
+    
+    return _session_maker
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionMaker() as session:
+    maker = get_session_maker()
+    async with maker() as session:
         yield session
 
-
 async def with_session(fn: Callable[..., Awaitable[T]], *args, **kwargs) -> T:
-    async with AsyncSessionMaker() as session:
+    maker = get_session_maker()
+    async with maker() as session:
         return await fn(session, *args, **kwargs)

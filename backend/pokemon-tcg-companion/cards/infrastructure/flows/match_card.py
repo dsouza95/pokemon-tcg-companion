@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from uuid import UUID
 
 from google.cloud import storage
-from prefect import flow, task
+from prefect import flow, task, get_run_logger
+from prefect.variables import Variable
+from prefect.blocks.system import Secret
 from pydantic_ai import BinaryContent
 from pydantic_ai.models.google import GoogleModelSettings
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,16 +25,23 @@ from cards.infrastructure.repositories import CardRepository, RefCardRepository
 from core.db import with_session
 from core.flows import with_logfire
 from core.settings import settings
+from prefect_gcp import GcpCredentials
 
 FLOW_NAME = "match_card_flow"
 
+async def _get_storage_client() -> storage.Client:
+    try:
+        gcp_credentials_block = await GcpCredentials.load("gcp-credentials")  # type: ignore[misc]
+        return gcp_credentials_block.get_cloud_storage_client()
+    except ValueError:
+        return storage.Client()
 
 @task(
     retries=settings.default_flow_retries,
     retry_delay_seconds=settings.default_flow_retry_delay_seconds,
 )
 async def download_card(card_path: str) -> bytes:
-    storage_client = storage.Client()
+    storage_client = await _get_storage_client()
     bucket = storage_client.bucket(settings.gcp_bucket)
     blob = bucket.blob(card_path)
 

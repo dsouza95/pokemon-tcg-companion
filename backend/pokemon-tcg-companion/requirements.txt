@@ -513,19 +513,32 @@ google-api-core==2.29.0 \
     --hash=sha256:84181be0f8e6b04006df75ddfe728f24489f0af57c96a529ff7cf45bc28797f7 \
     --hash=sha256:d30bc60980daa36e314b5d5a3e5958b0200cb44ca8fa1be2b614e932b75a3ea9
     # via
+    #   google-api-python-client
     #   google-cloud-core
     #   google-cloud-pubsub
+    #   google-cloud-secret-manager
     #   google-cloud-storage
+google-api-python-client==2.190.0 \
+    --hash=sha256:5357f34552e3724d80d2604c8fa146766e0a9d6bb0afada886fafed9feafeef6 \
+    --hash=sha256:d9b5266758f96c39b8c21d9bbfeb4e58c14dbfba3c931f7c5a8d7fdcd292dd57
+    # via prefect-gcp
 google-auth==2.48.0 \
     --hash=sha256:2e2a537873d449434252a9632c28bfc268b0adb1e53f9fb62afc5333a975903f \
     --hash=sha256:4f7e706b0cd3208a3d940a19a822c37a476ddba5450156c3e6624a71f7c841ce
     # via
     #   google-api-core
+    #   google-api-python-client
+    #   google-auth-httplib2
     #   google-cloud-core
     #   google-cloud-pubsub
+    #   google-cloud-secret-manager
     #   google-cloud-storage
     #   google-genai
     #   pokemon-tcg-companion
+google-auth-httplib2==0.3.0 \
+    --hash=sha256:177898a0175252480d5ed916aeea183c2df87c1f9c26705d74ae6b951c268b0b \
+    --hash=sha256:426167e5df066e3f5a0fc7ea18768c08e7296046594ce4c8c409c2457dd1f776
+    # via google-api-python-client
 google-cloud-core==2.5.0 \
     --hash=sha256:67d977b41ae6c7211ee830c7912e41003ea8194bff15ae7d72fd6f51e57acabc \
     --hash=sha256:7c1b7ef5c92311717bd05301aa1a91ffbc565673d3b0b4163a52d8413a186963
@@ -534,10 +547,16 @@ google-cloud-pubsub==2.35.0 \
     --hash=sha256:2c0d1d7ccda52fa12fb73f34b7eb9899381e2fd931c7d47b10f724cdfac06f95 \
     --hash=sha256:c32e4eb29e532ec784b5abb5d674807715ec07895b7c022b9404871dec09970d
     # via pokemon-tcg-companion
+google-cloud-secret-manager==2.26.0 \
+    --hash=sha256:0d1d6f76327685a0ed78a4cf50f289e1bfbbe56026ed0affa98663b86d6d50d6 \
+    --hash=sha256:940a5447a6ec9951446fd1a0f22c81a4303fde164cd747aae152c5f5c8e6723e
+    # via prefect-gcp
 google-cloud-storage==3.9.0 \
     --hash=sha256:2dce75a9e8b3387078cbbdad44757d410ecdb916101f8ba308abf202b6968066 \
     --hash=sha256:f2d8ca7db2f652be757e92573b2196e10fbc09649b5c016f8b422ad593c641cc
-    # via pokemon-tcg-companion
+    # via
+    #   pokemon-tcg-companion
+    #   prefect-gcp
 google-crc32c==1.8.0 \
     --hash=sha256:14f87e04d613dfa218d6135e81b78272c3b904e2a7053b841481b38a7d901411 \
     --hash=sha256:2a3dc3318507de089c5384cc74d54318401410f82aa65b2d9cdde9d297aca7cb \
@@ -633,7 +652,9 @@ griffelib==2.0.0 \
 grpc-google-iam-v1==0.14.3 \
     --hash=sha256:7a7f697e017a067206a3dfef44e4c634a34d3dee135fe7d7a4613fe3e59217e6 \
     --hash=sha256:879ac4ef33136c5491a6300e27575a9ec760f6cdf9a2518798c1b8977a5dc389
-    # via google-cloud-pubsub
+    # via
+    #   google-cloud-pubsub
+    #   google-cloud-secret-manager
 grpcio==1.78.0 \
     --hash=sha256:12a771591ae40bc65ba67048fa52ef4f0e6db8279e595fd349f9dfddeef571f9 \
     --hash=sha256:185dea0d5260cbb2d224c507bf2a5444d5abbb1fa3594c1ed7e4c709d5eb8383 \
@@ -669,6 +690,7 @@ grpcio==1.78.0 \
     # via
     #   google-api-core
     #   google-cloud-pubsub
+    #   google-cloud-secret-manager
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
@@ -699,6 +721,12 @@ httpcore==1.0.9 \
     #   clerk-backend-api
     #   httpx
     #   prefect
+httplib2==0.31.2 \
+    --hash=sha256:385e0869d7397484f4eab426197a4c020b606edd43372492337c0b4010ae5d24 \
+    --hash=sha256:dbf0c2fa3862acf3c55c078ea9c0bc4481d7dc5117cae71be9514912cf9f8349
+    # via
+    #   google-api-python-client
+    #   google-auth-httplib2
 httptools==0.7.1 \
     --hash=sha256:04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c \
     --hash=sha256:0e68b8582f4ea9166be62926077a3334064d422cf08ab87d8b74664f8e9058e1 \
@@ -1193,6 +1221,12 @@ pluggy==1.6.0 \
 prefect==3.6.17 \
     --hash=sha256:1b8b6ac60c81fa9e7e524c2bc58f8495fe8eaaab899030df73c511c38bbe5759 \
     --hash=sha256:5c3fee1730a520385f84da44e8583a4a3bacd180919da3a50d5df0003c99870a
+    # via
+    #   pokemon-tcg-companion
+    #   prefect-gcp
+prefect-gcp==0.6.17 \
+    --hash=sha256:4cfa5aad025dbb5bcf14a69766894ababe36ed68fa0befade572ec766e22f04a \
+    --hash=sha256:c4dab814c4c83927a608cb800ca30e8c98c5aede7bdd4ddce22f472737d86d59
     # via pokemon-tcg-companion
 prometheus-client==0.24.1 \
     --hash=sha256:150db128af71a5c2482b36e588fc8a6b95e498750da4b17065947c16070f4055 \
@@ -1287,6 +1321,7 @@ proto-plus==1.27.1 \
     # via
     #   google-api-core
     #   google-cloud-pubsub
+    #   google-cloud-secret-manager
 protobuf==6.33.5 \
     --hash=sha256:3093804752167bcab3998bec9f1048baae6e29505adaf1afd14a37bddede533c \
     --hash=sha256:69915a973dd0f60f31a08b8318b73eab2bd6a392c79184b3612226b0a3f8ec02 \
@@ -1299,6 +1334,7 @@ protobuf==6.33.5 \
     # via
     #   google-api-core
     #   google-cloud-pubsub
+    #   google-cloud-secret-manager
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
@@ -1440,6 +1476,10 @@ pyjwt==2.11.0 \
     --hash=sha256:35f95c1f0fbe5d5ba6e43f00271c275f7a1a4db1dab27bf708073b75318ea623 \
     --hash=sha256:94a6bde30eb5c8e04fee991062b534071fd1439ef58d2adc9ccb823e7bcd0469
     # via clerk-backend-api
+pyparsing==3.3.2 \
+    --hash=sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d \
+    --hash=sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc
+    # via httplib2
 python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
@@ -1465,7 +1505,9 @@ python-multipart==0.0.22 \
 python-slugify==8.0.4 \
     --hash=sha256:276540b79961052b66b7d116620b36518847f52d5fd9e3a70164fc8c50faa6b8 \
     --hash=sha256:59202371d1d05b54a9e7720c5e038f928f45daaffe41dd10822f3907b937c856
-    # via prefect
+    # via
+    #   prefect
+    #   prefect-gcp
 pytz==2025.2 \
     --hash=sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3 \
     --hash=sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00
@@ -1857,7 +1899,9 @@ tcgdex-sdk==2.2.1 \
 tenacity==9.1.4 \
     --hash=sha256:6095a360c919085f28c6527de529e76a06ad89b23659fa881ae0649b867a9d55 \
     --hash=sha256:adb31d4c263f2bd041081ab33b498309a57c77f9acf2db65aadf0898179cf93a
-    # via google-genai
+    # via
+    #   google-genai
+    #   prefect-gcp
 text-unidecode==1.3 \
     --hash=sha256:1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8 \
     --hash=sha256:bad6603bb14d279193107714b288be206cac565dfa49aa5b105294dd5c4aab93
@@ -1924,6 +1968,10 @@ tzlocal==5.3.1 \
     # via
     #   dateparser
     #   whenever
+uritemplate==4.2.0 \
+    --hash=sha256:480c2ed180878955863323eea31b0ede668795de182617fef9c6ca09e6ec9d0e \
+    --hash=sha256:962201ba1c4edcab02e60f9a0d3821e82dfc5d2d6662a21abd533879bdb8a686
+    # via google-api-python-client
 urllib3==2.6.3 \
     --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed \
     --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4

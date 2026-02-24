@@ -3,7 +3,16 @@ import type { components } from "@/lib/openapi-types";
 type CardRead = components["schemas"]["CardRead"];
 
 export function Card({ card }: { card: CardRead }) {
-  if (!card.ref_card) return;
+  if (!card.ref_card) {
+    return (
+      <div className="group relative flex cursor-pointer flex-col gap-2">
+        <div className="bg-muted relative aspect-[2.5/3.5] animate-pulse overflow-hidden rounded-xl" />
+        <span className="text-muted-foreground truncate text-center text-sm font-medium">
+          Matching card…
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="group relative flex cursor-pointer flex-col gap-2">
       <div className="bg-muted relative aspect-[2.5/3.5] overflow-hidden rounded-xl transition-transform duration-200 group-hover:scale-105 group-hover:shadow-2xl">

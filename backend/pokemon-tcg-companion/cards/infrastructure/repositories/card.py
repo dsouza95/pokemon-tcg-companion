@@ -28,8 +28,10 @@ class CardRepository(AbstractCardRepository):
         return await self.session.get(Card, id)
 
     async def list(self) -> Sequence[Card]:
-        stmt = select(Card).options(
-            selectinload(cast(QueryableAttribute, Card.ref_card))
+        stmt = (
+            select(Card)
+            .options(selectinload(cast(QueryableAttribute, Card.ref_card)))
+            .order_by(Card.ref_card_id.is_(None).desc())
         )
         return (await self.session.execute(stmt)).scalars().all()
 

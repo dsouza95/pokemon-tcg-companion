@@ -23,12 +23,19 @@ async function handler(req: NextRequest) {
     body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
     // @ts-expect-error duplex required for streaming request body
     duplex: "half",
+    cache: "no-store",
   });
+
+  const responseHeaders = new Headers(res.headers);
+  responseHeaders.set(
+    "Access-Control-Expose-Headers",
+    "electric-offset, electric-handle, electric-schema, electric-cursor, electric-up-to-date",
+  );
 
   return new NextResponse(res.body, {
     status: res.status,
     statusText: res.statusText,
-    headers: res.headers,
+    headers: responseHeaders,
   });
 }
 

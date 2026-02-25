@@ -1,29 +1,29 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+"use client";
 
+import { eq, useLiveQuery } from "@tanstack/react-db";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { cardsCollection, refcardsCollection } from "@/lib/db";
 import type { components } from "@/lib/openapi-types";
 
 type CardRead = components["schemas"]["CardRead"];
 
 export function useCards() {
-  return useQuery<CardRead[], Error>({
-    queryKey: ["cards"],
-    queryFn: async () => {
-      const res = await fetch("/api/cards/");
-      if (!res.ok) throw new Error("Failed to fetch cards");
-      return (await res.json()) as CardRead[];
-    },
-  });
-}
+  const { data, isLoading, isError } = useLiveQuery(
+    (q) =>
+      q
+        .from({ c: cardsCollection })
+        .leftJoin({ rc: refcardsCollection }, ({ c, rc }) =>
+          eq(c.ref_card_id, rc.id),
+        )
+        .select(({ c, rc }) => ({
+          ...c,
+          ref_card: rc,
+        })),
+    [],
+  );
 
-export function useCard(id: string) {
-  return useQuery<CardRead, Error>({
-    queryKey: ["card", id],
-    queryFn: async () => {
-      const res = await fetch(`/api/cards/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch card");
-      return (await res.json()) as CardRead;
-    },
-  });
+  return { data: data || [], isLoading, isError };
 }
 
 export function useCreateCard() {

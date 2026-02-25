@@ -13,11 +13,25 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command: postgres -c wal_level=logical -c max_replication_slots=10 -c max_wal_senders=10
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  electric:
+    image: electricsql/electric:canary
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@database:5432/pokemon_tcg_companion_db?sslmode=disable"
+      ELECTRIC_USER_AUTH_MODE: "unsafe"
+      ELECTRIC_SECRET: "my-source-secret"
+    ports:
+      - "3001:3000"
 
   prefect-server:
     image: prefecthq/prefect:3-latest

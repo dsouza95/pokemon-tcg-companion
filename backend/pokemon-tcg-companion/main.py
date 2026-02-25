@@ -18,6 +18,13 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=[
+        "electric-offset",
+        "electric-handle",
+        "electric-schema",
+        "electric-cursor",
+        "electric-up-to-date",
+    ],
 )
 
 app.include_router(cards_router)

@@ -1,6 +1,7 @@
 import json
 from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import FastAPI
 from google.cloud import pubsub_v1, storage
 from google.oauth2 import service_account
@@ -30,4 +31,11 @@ async def lifespan(app: FastAPI):
     credentials = _get_gcp_credentials()
     app.state.storage_client = storage.Client(credentials=credentials)
     app.state.publisher = pubsub_v1.PublisherClient(credentials=credentials)
-    yield
+    # Use a long-lived client with no read timeout for streaming sync
+    app.state.sync_http_client = httpx.AsyncClient(
+        timeout=httpx.Timeout(timeout=20.0, read=None)
+    )
+    try:
+        yield
+    finally:
+        await app.state.sync_http_client.aclose()

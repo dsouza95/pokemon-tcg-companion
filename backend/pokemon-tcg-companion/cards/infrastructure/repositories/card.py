@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from typing import Optional, cast
 from uuid import UUID
 
-from sqlalchemy import update
+from sqlalchemy import desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import QueryableAttribute, selectinload
 from sqlalchemy.sql import ColumnElement
@@ -31,7 +31,7 @@ class CardRepository(AbstractCardRepository):
         stmt = (
             select(Card)
             .options(selectinload(cast(QueryableAttribute, Card.ref_card)))
-            .order_by(Card.ref_card_id.is_(None).desc())
+            .order_by(desc(cast(QueryableAttribute, Card.ref_card_id).is_(None)))
         )
         return (await self.session.execute(stmt)).scalars().all()
 

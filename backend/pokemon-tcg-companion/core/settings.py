@@ -18,8 +18,10 @@ class Settings(BaseSettings):
     electric_service_url: str = "http://localhost:3001/v1/shape"
     gcp_bucket: str
     gcp_pubsub_project: str = "local-project"
+    pubsub_audience: Optional[str] = None
+    pubsub_service_account_email: Optional[str] = None
     google_application_credentials_json: Optional[str] = None
     prefect_deployment: str = "default"
     log_level: str = "DEBUG"
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg] Pydantic fills the values in runtime

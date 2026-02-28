@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
 from cards.domain.models.card import Card
 from cards.infrastructure.flows.match_card import FLOW_NAME
 from core import flows
+from core.auth import verify_pubsub_token
 from core.pubsub_model import PubSubEnvelope
 
 router = APIRouter(prefix="/cards/webhooks", tags=["webhooks"])
 
 
-@router.post("/card-created")
+@router.post("/card-created", dependencies=[Depends(verify_pubsub_token)])
 async def handle_card_created(envelope: PubSubEnvelope):
-    # TODO: verify webhook signature to ensure the request is coming from a trusted source
     try:
         payload = envelope.get_payload(Card)
     except ValidationError as e:

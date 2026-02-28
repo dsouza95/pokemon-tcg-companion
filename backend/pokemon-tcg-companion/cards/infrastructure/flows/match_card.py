@@ -39,25 +39,23 @@ async def _get_storage_client() -> storage.Client:
     retries=settings.default_flow_retries,
     retry_delay_seconds=settings.default_flow_retry_delay_seconds,
 )
-async def download_card(card_path: str) -> bytes:
+async def download_card(card_path: str) -> tuple[bytes, str]:
     storage_client = await _get_storage_client()
     bucket = storage_client.bucket(settings.gcp_bucket)
     blob = bucket.blob(card_path)
 
-    return await asyncio.to_thread(blob.download_as_bytes)
-
+    return await asyncio.to_thread(blob.download_as_bytes), blob.content_type
 
 @task(
     retries=settings.default_flow_retries,
     retry_delay_seconds=settings.default_flow_retry_delay_seconds,
 )
-async def extract_card_metadata(card_bytes: bytes) -> CardMetadata:
+async def extract_card_metadata(card_bytes: bytes, card_mimetype: str) -> CardMetadata:
     agent = CardMetadataExtractor()
-    # TODO: media_type should ideally be inferred from the file extension in the image path
     result = await agent.run(
         [
             "Extract metadata from the following pokémon card:",
-            BinaryContent(data=card_bytes, media_type="image/jpeg"),
+            BinaryContent(data=card_bytes, media_type=card_mimetype),
         ],
         model_settings=GoogleModelSettings(
             google_thinking_config={"include_thoughts": True}
@@ -87,14 +85,14 @@ async def find_match_candidates(metadata: CardMetadata) -> list[RefCard]:
     retries=settings.default_flow_retries,
     retry_delay_seconds=settings.default_flow_retry_delay_seconds,
 )
-async def match_card(card_bytes: bytes, candidates: list[RefCard]) -> RefCard:
+async def match_card(card_bytes: bytes, card_mimetype: str, candidates: list[RefCard]) -> RefCard:
     agent = RefCardMatcher()
     result = await agent.run(
         [
             "Match the provided pokémon card to one of the candidates:\n",
             f"Candidates: {[c.model_dump(mode='json') for c in candidates]}\n",
             "Image: ",
-            BinaryContent(data=card_bytes, media_type="image/jpeg"),
+            BinaryContent(data=card_bytes, media_type=card_mimetype),
         ],
         model_settings=GoogleModelSettings(
             google_thinking_config={"include_thoughts": True}
@@ -137,8 +135,8 @@ async def update_card_with_match(card_id: str, matched_card: RefCard) -> Card:
 @flow(name=FLOW_NAME, log_prints=True)
 @with_logfire(pydantic_ai=True)
 async def match_card_flow(card_id: str, image_path: str):
-    card_bytes = await download_card(image_path)
-    card_metadata = await extract_card_metadata(card_bytes)
+    card_bytes, card_mimetype = await download_card(image_path)
+    card_metadata = await extract_card_metadata(card_bytes, card_mimetype)
     candidates = await find_match_candidates(card_metadata)
     if len(candidates) == 0:
         raise ValueError(
@@ -147,7 +145,7 @@ async def match_card_flow(card_id: str, image_path: str):
             f"tcg_local_id={card_metadata.tcg_local_id!r}"
         )
 
-    matched_ref_card = await match_card(card_bytes, candidates)
+    matched_ref_card = await match_card(card_bytes, card_mimetype, candidates)
     card = await update_card_with_match(card_id, matched_ref_card)
 
     return {

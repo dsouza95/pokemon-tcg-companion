@@ -16,7 +16,7 @@ def _get_electric_connection_url(request: Request, table_name: str):
     params = dict(request.query_params)
     params["table"] = table_name
     params["source_id"] = settings.electric_source_id
-    params["secret"] = settings.electric_source_secret
+    params["secret"] = settings.electric_source_secret.get_secret_value()
 
     return f"{base_url}?{httpx.QueryParams(params)}"
 

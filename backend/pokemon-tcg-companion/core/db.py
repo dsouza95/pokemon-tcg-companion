@@ -44,9 +44,7 @@ def _normalize_async_url(url: str) -> str:
 def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
-        url = _normalize_async_url(
-            os.environ.get("DATABASE_URL", settings.database_url)
-        )
+        url = _normalize_async_url(settings.database_url.get_secret_value())
         _engine = create_async_engine(url, future=True, echo=False)
 
     return _engine

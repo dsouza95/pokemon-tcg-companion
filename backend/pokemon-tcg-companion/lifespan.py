@@ -19,7 +19,7 @@ def _get_gcp_credentials() -> service_account.Credentials | None:
     if not settings.google_application_credentials_json:
         return None
 
-    info = json.loads(settings.google_application_credentials_json)
+    info = json.loads(settings.google_application_credentials_json.get_secret_value())
     return service_account.Credentials.from_service_account_info(
         info,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],

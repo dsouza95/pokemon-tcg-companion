@@ -12,7 +12,7 @@ from core.settings import settings
 
 logger = logging.getLogger(__name__)
 
-clerk = Clerk(bearer_auth=settings.clerk_secret_key)
+clerk = Clerk(bearer_auth=settings.clerk_secret_key.get_secret_value())
 
 
 async def require_auth(request: Request) -> dict:
@@ -47,10 +47,9 @@ def verify_pubsub_token(authorization: str = Header(default="")) -> None:
         logger.warning("Pub/Sub token email is not verified (email=%s)", email)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    if email != settings.pubsub_service_account_email:
+    if email != settings.pubsub_service_account_email.get_secret_value():
         logger.warning(
-            "Pub/Sub token email mismatch: got %r, expected %r",
+            "Pub/Sub token email mismatch: got %r",
             email,
-            settings.pubsub_service_account_email,
         )
         raise HTTPException(status_code=401, detail="Unauthorized")

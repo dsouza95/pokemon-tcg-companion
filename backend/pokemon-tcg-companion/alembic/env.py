@@ -11,7 +11,7 @@ from core.db import _normalize_async_url
 from core.settings import settings
 
 config = context.config
-config.set_main_option("sqlalchemy.url", _normalize_async_url(settings.database_url))
+config.set_main_option("sqlalchemy.url", _normalize_async_url(settings.database_url.get_secret_value()))
 
 
 def load_models(package_names: list[str]) -> None:

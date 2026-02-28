@@ -16,6 +16,7 @@ export function useCards() {
         .leftJoin({ rc: refcardsCollection }, ({ c, rc }) =>
           eq(c.ref_card_id, rc.id),
         )
+        .orderBy(({ rc }) => rc?.name, "asc")
         .select(({ c, rc }) => ({
           ...c,
           ref_card: rc,

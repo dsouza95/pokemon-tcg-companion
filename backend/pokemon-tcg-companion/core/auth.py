@@ -32,13 +32,15 @@ def verify_pubsub_token(authorization: str = Header(default="")) -> None:
     """Verify the bearer token attached by Pub/Sub to push requests."""
     if not settings.pubsub_audience or not settings.pubsub_service_account_email:
         return
-    
+
     try:
         token = authorization.removeprefix("Bearer ")
-        claim = id_token.verify_oauth2_token(token, google_requests.Request(), audience=settings.pubsub_audience)
+        claim = id_token.verify_oauth2_token(
+            token, google_requests.Request(), audience=settings.pubsub_audience
+        )
     except Exception:
         logger.warning("Pub/Sub token verification failed", exc_info=True)
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        raise HTTPException(status_code=401, detail="Unauthorized") from None
 
     email = claim.get("email")
     email_verified = claim.get("email_verified")

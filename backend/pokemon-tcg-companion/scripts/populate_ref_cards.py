@@ -29,6 +29,9 @@ async def populate_set(tcgdex: TCGdex, set_id: str) -> int:
         print(f"  No cards found for set '{set_id}'")
         return 0
 
+    release_year = (
+        int(set_data.releaseDate.split("-")[0]) if set_data.releaseDate else None
+    )
     cards = [
         RefCardAdd(
             tcg_id=card.id,
@@ -37,6 +40,7 @@ async def populate_set(tcgdex: TCGdex, set_id: str) -> int:
             image_url=card.get_image_url("high", "webp"),
             set_id=set_data.id,
             set_name=set_data.name,
+            set_year=release_year,
         )
         for card in set_data.cards
     ]

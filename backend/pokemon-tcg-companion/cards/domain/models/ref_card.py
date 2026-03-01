@@ -13,6 +13,7 @@ class RefCardBase(SQLModel):
     image_url: Optional[str] = None
     set_id: str
     set_name: str
+    set_year: Optional[int] = None
 
 
 class RefCard(RefCardBase, table=True):

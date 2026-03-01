@@ -75,7 +75,7 @@ async def find_match_candidates(metadata: CardMetadata) -> list[RefCard]:
         service = RefCardService(RefCardRepository(session))
         return await service.find_match_candidates(
             name=metadata.name,
-            set_id=metadata.set_id,
+            year=metadata.year,
             local_id=metadata.tcg_local_id,
         )
 
@@ -151,7 +151,7 @@ async def match_card_flow(card_id: str, image_path: str):
         if len(candidates) == 0:
             raise ValueError(
                 f"No candidates found for extracted metadata: "
-                f"name={card_metadata.name!r}, set_id={card_metadata.set_id!r}, "
+                f"name={card_metadata.name!r}, year={card_metadata.year!r}, "
                 f"tcg_local_id={card_metadata.tcg_local_id!r}"
             )
 

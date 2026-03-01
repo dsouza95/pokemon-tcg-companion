@@ -56,18 +56,18 @@ async def test_basic_operations(session):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "name, set_id, local_id, description",
+    "name, year, local_id, description",
     [
-        # Wrong set_id: only name+local_id search yields results
-        ("Charizard", "wrong-set", "4", "wrong set_id"),
-        # Wrong local_id: only set+name search yields results
-        ("Charizard", "base1", "999", "wrong local_id"),
-        # Wrong name: only set+local search yields results (highest RRF weight)
-        ("WrongCard", "base1", "4", "wrong name"),
+        # Wrong year: only name+local_id search yields results
+        ("Charizard", 9999, "4", "wrong year"),
+        # Wrong local_id: only year+name search yields results
+        ("Charizard", 1999, "999", "wrong local_id"),
+        # Wrong name: only year+local search yields results (highest RRF weight)
+        ("WrongCard", 1999, "4", "wrong name"),
     ],
 )
 async def test_find_match_candidates_with_one_wrong_metadata_field(
-    session, name, set_id, local_id, description
+    session, name, year, local_id, description
 ):
     """RRF candidate search recovers when any single metadata field is wrong."""
     repo = RefCardRepository(session)
@@ -81,11 +81,12 @@ async def test_find_match_candidates_with_one_wrong_metadata_field(
             image_url="https://assets.tcgdex.net/en/base/base1/4/high.png",
             set_id="base1",
             set_name="Base Set",
+            set_year=1999,
         )
     )
 
     candidates = await svc.find_match_candidates(
-        name=name, set_id=set_id, local_id=local_id
+        name=name, year=year, local_id=local_id
     )
 
     assert len(candidates) == 1, f"Expected 1 candidate with {description}"

@@ -29,13 +29,14 @@ async def ref_card(session):
             image_url="https://assets.tcgdex.net/en/base/base1/4/high.png",
             set_id="base1",
             set_name="Base Set",
+            set_year=1999,
         )
     )
 
 
 @pytest.fixture
 def mock_card_metadata_agent():
-    metadata = CardMetadata(name="Charizard", tcg_local_id="4", set_id="base1")
+    metadata = CardMetadata(name="Charizard", tcg_local_id="4", year=1999)
     mock_agent_class, _ = create_mock_agent(metadata)
     with patch(
         "cards.infrastructure.flows.match_card.CardMetadataExtractor",
@@ -222,7 +223,7 @@ class TestCardsAPI:
         """Card matching fails gracefully when the extraction hallucinates non-existent metadata (no candidates)."""
         # Mock metadata extractor to return a card that doesn't exist in the DB
         hallucinated_metadata = CardMetadata(
-            name="Hallucinated Card", tcg_local_id="9999", set_id="none"
+            name="Hallucinated Card", tcg_local_id="9999", year=0
         )
         mock_extractor_class, _ = create_mock_agent(hallucinated_metadata)
 

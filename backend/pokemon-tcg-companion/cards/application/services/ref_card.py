@@ -29,16 +29,18 @@ class RefCardService:
         return await self.repo.upsert_many(cards)
 
     async def find_match_candidates(
-        self, name: str, set_id: str, local_id: str, limit: int = 10
+        self, name: str, year: int, local_id: str, limit: int = 10
     ) -> list[RefCard]:
         # TODO: this can be optimized by doing the three searches in parallel,
         # but its tricky since we cant reuse the same session across threads
-        set_local = await self.repo.search_by_set_id_and_local_id(set_id, local_id)
-        set_name = await self.repo.search_by_set_id_and_name(set_id, name)
+        year_local = (
+            await self.repo.search_by_year_and_local_id(year, local_id) if year else []
+        )
+        year_name = await self.repo.search_by_year_and_name(year, name) if year else []
         local_name = await self.repo.search_by_local_id_and_name(local_id, name)
 
         return reciprocal_rank_fusion(
-            [set_local, set_name, local_name],
+            [year_local, year_name, local_name],
             limit=limit,
             weights=[2.0, 1.0, 1.0],
         )

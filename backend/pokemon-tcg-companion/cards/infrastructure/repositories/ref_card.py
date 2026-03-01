@@ -19,9 +19,9 @@ class RefCardQuery:
         self._session = session
         self._stmt: Select = select(RefCard)
 
-    def by_set_id(self, set_id: str) -> Self:
+    def by_year(self, year: int) -> Self:
         self._stmt = self._stmt.where(
-            cast(ColumnElement[bool], RefCard.set_id == set_id)
+            cast(ColumnElement[bool], RefCard.set_year == year)
         )
         return self
 
@@ -100,15 +100,15 @@ class RefCardRepository(AbstractRefCardRepository):
             if isinstance(obj, RefCard) and obj.tcg_id in upserted_tcg_ids:
                 self.session.expire(obj)
 
-    async def search_by_set_id_and_local_id(
-        self, set_id: str, local_id: str
+    async def search_by_year_and_local_id(
+        self, year: int, local_id: str
     ) -> Sequence[RefCard]:
-        return await self.query().by_set_id(set_id).by_local_id(local_id).all()
+        return await self.query().by_year(year).by_local_id(local_id).all()
 
-    async def search_by_set_id_and_name(
-        self, set_id: str, name: str, limit: int = 20
+    async def search_by_year_and_name(
+        self, year: int, name: str, limit: int = 20
     ) -> Sequence[RefCard]:
-        return await self.query().by_set_id(set_id).by_name(name, limit=limit).all()
+        return await self.query().by_year(year).by_name(name, limit=limit).all()
 
     async def search_by_local_id_and_name(
         self, local_id: str, name: str, limit: int = 20

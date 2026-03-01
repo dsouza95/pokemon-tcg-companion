@@ -135,10 +135,44 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Card"
+                  "$ref": "#/components/schemas/CardRead"
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "cards"
+        ],
+        "summary": "Delete Card",
+        "operationId": "delete_card_cards__card_id__delete",
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Card Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -160,16 +194,205 @@
         ],
         "summary": "Handle Card Created",
         "operationId": "handle_card_created_cards_webhooks_card_created_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PubSubEnvelope"
               }
             }
-          },
-          "required": true
+          }
         },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/{table_name}": {
+      "patch": {
+        "summary": "Sync Proxy",
+        "operationId": "sync_proxy_sync__table_name__patch",
+        "parameters": [
+          {
+            "name": "table_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Table Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Sync Proxy",
+        "operationId": "sync_proxy_sync__table_name__patch",
+        "parameters": [
+          {
+            "name": "table_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Table Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Sync Proxy",
+        "operationId": "sync_proxy_sync__table_name__patch",
+        "parameters": [
+          {
+            "name": "table_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Table Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Sync Proxy",
+        "operationId": "sync_proxy_sync__table_name__patch",
+        "parameters": [
+          {
+            "name": "table_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Table Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Sync Proxy",
+        "operationId": "sync_proxy_sync__table_name__patch",
+        "parameters": [
+          {
+            "name": "table_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Table Name"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -237,6 +460,10 @@
             "type": "string",
             "format": "uuid",
             "title": "Id"
+          },
+          "matching_status": {
+            "$ref": "#/components/schemas/MatchingStatus",
+            "default": "pending"
           }
         },
         "type": "object",
@@ -273,22 +500,17 @@
             "type": "string",
             "title": "Image Path"
           },
-          "ref_card": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RefCardRead"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "matching_status": {
+            "$ref": "#/components/schemas/MatchingStatus"
           }
         },
         "type": "object",
         "required": [
           "id",
+          "ref_card_id",
           "user_id",
-          "image_path"
+          "image_path",
+          "matching_status"
         ],
         "title": "CardRead"
       },
@@ -336,6 +558,15 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "MatchingStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "matched",
+          "failed"
+        ],
+        "title": "MatchingStatus"
+      },
       "PubSubEnvelope": {
         "properties": {
           "message": {
@@ -377,56 +608,6 @@
         ],
         "title": "PubSubMessage",
         "description": "Pub/Sub message structure."
-      },
-      "RefCardRead": {
-        "properties": {
-          "tcg_id": {
-            "type": "string",
-            "title": "Tcg Id"
-          },
-          "tcg_local_id": {
-            "type": "string",
-            "title": "Tcg Local Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "image_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Image Url"
-          },
-          "set_id": {
-            "type": "string",
-            "title": "Set Id"
-          },
-          "set_name": {
-            "type": "string",
-            "title": "Set Name"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tcg_id",
-          "tcg_local_id",
-          "name",
-          "set_id",
-          "set_name",
-          "id"
-        ],
-        "title": "RefCardRead"
       },
       "UploadUrlResponse": {
         "properties": {

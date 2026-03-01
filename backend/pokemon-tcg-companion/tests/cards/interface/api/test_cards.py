@@ -7,31 +7,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
 import pytest
-import pytest_asyncio
 
 from cards.application.agents.card_metadata_extractor import CardMetadata
 from cards.application.agents.ref_card_matcher import MatchResult
-from cards.application.services import CardService, RefCardService
-from cards.domain.models import CardAdd, CardRead, MatchingStatus, RefCardAdd
-from cards.infrastructure.repositories import CardRepository, RefCardRepository
+from cards.application.services import CardService
+from cards.domain.models import CardAdd, CardRead, MatchingStatus
+from cards.infrastructure.repositories import CardRepository
 from tests.utils.mocks import create_mock_agent, create_mock_storage_client
 from tests.utils.pubsub import create_pubsub_message
-
-
-@pytest_asyncio.fixture
-async def ref_card(session):
-    service = RefCardService(RefCardRepository(session))
-    return await service.add_card(
-        RefCardAdd(
-            name="Charizard",
-            tcg_id="base1-4",
-            tcg_local_id="4",
-            image_url="https://assets.tcgdex.net/en/base/base1/4/high.png",
-            set_id="base1",
-            set_name="Base Set",
-            set_year=1999,
-        )
-    )
 
 
 @pytest.fixture

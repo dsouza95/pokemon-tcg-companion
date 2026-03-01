@@ -16,14 +16,14 @@ import asyncio
 
 from tcgdexsdk import TCGdex
 
-from cards.application.services import RefCardService
-from cards.domain.models import RefCardAdd
-from cards.infrastructure.repositories import RefCardRepository
+from cards.application.services import RefCardService, TcgSetService
+from cards.domain.models import RefCardAdd, TcgSetAdd
+from cards.infrastructure.repositories import RefCardRepository, TcgSetRepository
 from core.db import get_session_maker
 
 
 async def populate_set(tcgdex: TCGdex, set_id: str) -> int:
-    """Upsert all cards for a set. Returns number of cards upserted."""
+    """Upsert a set and all its cards. Returns number of cards upserted."""
     set_data = await tcgdex.set.get(set_id)
     if not set_data or not set_data.cards:
         print(f"  No cards found for set '{set_id}'")
@@ -32,23 +32,24 @@ async def populate_set(tcgdex: TCGdex, set_id: str) -> int:
     release_year = (
         int(set_data.releaseDate.split("-")[0]) if set_data.releaseDate else None
     )
-    cards = [
-        RefCardAdd(
-            tcg_id=card.id,
-            tcg_local_id=card.localId,
-            name=card.name,
-            image_url=card.get_image_url("high", "webp"),
-            set_id=set_data.id,
-            set_name=set_data.name,
-            set_year=release_year,
-        )
-        for card in set_data.cards
-    ]
 
     session_maker = get_session_maker()
     async with session_maker() as session:
-        svc = RefCardService(RefCardRepository(session))
-        await svc.upsert_many_cards(cards)
+        tcg_set = await TcgSetService(TcgSetRepository(session)).upsert_set(
+            TcgSetAdd(tcg_id=set_data.id, name=set_data.name, year=release_year)
+        )
+
+        cards = [
+            RefCardAdd(
+                tcg_id=card.id,
+                tcg_local_id=card.localId,
+                name=card.name,
+                image_url=card.get_image_url("high", "webp"),
+                set_id=tcg_set.id,
+            )
+            for card in set_data.cards
+        ]
+        await RefCardService(RefCardRepository(session)).upsert_many_cards(cards)
 
     print(f"  '{set_id}': {len(cards)} upserted")
     return len(cards)

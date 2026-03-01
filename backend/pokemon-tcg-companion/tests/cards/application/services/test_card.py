@@ -1,28 +1,15 @@
 import pytest
 
-from cards.application.services import CardService, RefCardService
-from cards.domain.models import CardAdd, CardUpdate, RefCardAdd
-from cards.infrastructure.repositories import CardRepository, RefCardRepository
+from cards.application.services import CardService
+from cards.domain.models import CardAdd, CardUpdate, RefCard
+from cards.infrastructure.repositories import CardRepository
 
 
 @pytest.mark.asyncio
-async def test_service(session):
+async def test_service(session, ref_card: RefCard):
     repo = CardRepository(session)
     svc = CardService(repo)
 
-    ref_card_repo = RefCardRepository(session)
-    ref_card_svc = RefCardService(ref_card_repo)
-
-    ref_card = await ref_card_svc.add_card(
-        RefCardAdd(
-            name="Charizard",
-            tcg_id="base1-1",
-            tcg_local_id="1",
-            image_url="https://assets.tcgdex.net/en/base/base1/1/high.png",
-            set_id="base1",
-            set_name="Base Set",
-        )
-    )
     card = await svc.add_card(
         CardAdd(
             ref_card_id=ref_card.id,

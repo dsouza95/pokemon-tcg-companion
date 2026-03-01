@@ -1,12 +1,12 @@
 import pytest
 
 from cards.application.services import RefCardService
-from cards.domain.models import RefCardAdd, RefCardUpdate
+from cards.domain.models import RefCardAdd, RefCardUpdate, TcgSet
 from cards.infrastructure.repositories import RefCardRepository
 
 
 @pytest.mark.asyncio
-async def test_basic_operations(session):
+async def test_basic_operations(session, tcg_set: TcgSet):
     repo = RefCardRepository(session)
     svc = RefCardService(repo)
 
@@ -16,8 +16,7 @@ async def test_basic_operations(session):
             tcg_id="base1-1",
             tcg_local_id="1",
             image_url="https://assets.tcgdex.net/en/base/base1/1/high.png",
-            set_id="base1",
-            set_name="Base Set",
+            set_id=tcg_set.id,
         )
     )
 
@@ -43,8 +42,7 @@ async def test_basic_operations(session):
     assert retrieved_card.name == "Charizard"
     assert retrieved_card.tcg_id == "base1-4"
     assert retrieved_card.tcg_local_id == "4"
-    assert retrieved_card.set_id == "base1"
-    assert retrieved_card.set_name == "Base Set"
+    assert retrieved_card.set_id == tcg_set.id
     assert (
         retrieved_card.image_url == "https://assets.tcgdex.net/en/base/base1/4/high.png"
     )
@@ -67,7 +65,7 @@ async def test_basic_operations(session):
     ],
 )
 async def test_find_match_candidates_with_one_wrong_metadata_field(
-    session, name, year, local_id, description
+    session, tcg_set: TcgSet, name, year, local_id, description
 ):
     """RRF candidate search recovers when any single metadata field is wrong."""
     repo = RefCardRepository(session)
@@ -79,9 +77,7 @@ async def test_find_match_candidates_with_one_wrong_metadata_field(
             tcg_id="base1-4",
             tcg_local_id="4",
             image_url="https://assets.tcgdex.net/en/base/base1/4/high.png",
-            set_id="base1",
-            set_name="Base Set",
-            set_year=1999,
+            set_id=tcg_set.id,
         )
     )
 
@@ -94,7 +90,7 @@ async def test_find_match_candidates_with_one_wrong_metadata_field(
 
 
 @pytest.mark.asyncio
-async def test_upsert_many_cards(session):
+async def test_upsert_many_cards(session, tcg_set: TcgSet):
     repo = RefCardRepository(session)
     svc = RefCardService(repo)
 
@@ -103,15 +99,13 @@ async def test_upsert_many_cards(session):
             name="Charizard",
             tcg_id="base1-4",
             tcg_local_id="4",
-            set_id="base1",
-            set_name="Base Set",
+            set_id=tcg_set.id,
         ),
         RefCardAdd(
             name="Blastoise",
             tcg_id="base1-2",
             tcg_local_id="2",
-            set_id="base1",
-            set_name="Base Set",
+            set_id=tcg_set.id,
         ),
     ]
     await svc.upsert_many_cards(cards)
@@ -126,15 +120,13 @@ async def test_upsert_many_cards(session):
             name="Charizard EX",
             tcg_id="base1-4",
             tcg_local_id="4",
-            set_id="base1",
-            set_name="Base Set",
+            set_id=tcg_set.id,
         ),
         RefCardAdd(
             name="Blastoise EX",
             tcg_id="base1-2",
             tcg_local_id="2",
-            set_id="base1",
-            set_name="Base Set",
+            set_id=tcg_set.id,
         ),
     ]
     await svc.upsert_many_cards(updated)

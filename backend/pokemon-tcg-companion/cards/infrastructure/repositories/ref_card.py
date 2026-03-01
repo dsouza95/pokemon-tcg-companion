@@ -11,6 +11,7 @@ from sqlalchemy.sql import ColumnElement, Select
 from sqlmodel import select
 
 from cards.domain.models import RefCard, RefCardAdd, RefCardUpdate
+from cards.domain.models.tcg_set import TcgSet
 from cards.domain.repositories import AbstractRefCardRepository
 
 
@@ -20,9 +21,9 @@ class RefCardQuery:
         self._stmt: Select = select(RefCard)
 
     def by_year(self, year: int) -> Self:
-        self._stmt = self._stmt.where(
-            cast(ColumnElement[bool], RefCard.set_year == year)
-        )
+        self._stmt = self._stmt.join(
+            TcgSet, cast(ColumnElement[bool], RefCard.set_id == TcgSet.id)
+        ).where(cast(ColumnElement[bool], TcgSet.year == year))
         return self
 
     def by_local_id(self, local_id: str) -> Self:

@@ -11,16 +11,14 @@ class RefCardBase(SQLModel):
     tcg_local_id: str
     name: str
     image_url: Optional[str] = None
-    set_id: str
-    set_name: str
-    set_year: Optional[int] = None
+    set_id: UUID
 
 
 class RefCard(RefCardBase, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     tcg_id: str = Field(index=True, unique=True)
     tcg_local_id: str = Field(index=True)
-    set_id: str = Field(index=True)
+    set_id: UUID = Field(foreign_key="tcgset.id", index=True)
 
 
 class RefCardRead(RefCardBase):
@@ -36,5 +34,4 @@ class RefCardUpdate(SQLModel):
     tcg_local_id: Optional[str] = None
     name: Optional[str] = None
     image_url: Optional[str] = None
-    set_id: Optional[str] = None
-    set_name: Optional[str] = None
+    set_id: Optional[UUID] = None

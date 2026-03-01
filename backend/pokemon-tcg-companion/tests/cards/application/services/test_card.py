@@ -50,3 +50,8 @@ async def test_service(session):
     # List cards and verify retrieved card is the only one
     cards = await svc.list_cards()
     assert cards == [retrieved_card]
+
+    # Delete the card
+    await svc.delete_card(card.id)
+    deleted_card = await svc.get_card(card.id)
+    assert deleted_card is None

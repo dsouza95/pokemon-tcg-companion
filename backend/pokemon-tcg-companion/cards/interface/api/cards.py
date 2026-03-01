@@ -102,3 +102,10 @@ async def get_card(card_id: UUID, session: AsyncSession = db_session):
     if card is None:
         raise HTTPException(status_code=404, detail="card not found")
     return card
+
+
+@router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_card(card_id: UUID, session: AsyncSession = db_session):
+    repo = CardRepository(session)
+    svc = CardService(repo)
+    await svc.delete_card(card_id)

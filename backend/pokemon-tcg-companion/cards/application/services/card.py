@@ -23,3 +23,6 @@ class CardService:
 
     async def list_cards(self) -> Sequence[Card]:
         return await self.repo.list()
+
+    async def delete_card(self, id: UUID) -> None:
+        return await self.repo.delete(id)

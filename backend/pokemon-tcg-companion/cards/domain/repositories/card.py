@@ -18,3 +18,6 @@ class AbstractCardRepository(ABC):
 
     @abstractmethod
     async def update(self, id: UUID, card: CardUpdate) -> Card: ...
+
+    @abstractmethod
+    async def delete(self, id: UUID) -> None: ...

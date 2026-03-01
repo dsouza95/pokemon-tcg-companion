@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from typing import Optional, cast
 from uuid import UUID
 
-from sqlalchemy import desc, update
+from sqlalchemy import delete, desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import QueryableAttribute, selectinload
 from sqlalchemy.sql import ColumnElement
@@ -47,3 +47,8 @@ class CardRepository(AbstractCardRepository):
         updated_card = result.scalar_one()
         await self.session.commit()
         return updated_card
+
+    async def delete(self, id: UUID) -> None:
+        stmt = delete(Card).where(cast(ColumnElement[bool], Card.id == id))
+        await self.session.execute(stmt)
+        await self.session.commit()

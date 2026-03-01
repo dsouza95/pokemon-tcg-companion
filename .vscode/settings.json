@@ -1,3 +1,11 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/backend/pokemon-tcg-companion/.venv/bin/python"
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/pokemon-tcg-companion/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/backend/pokemon-tcg-companion"
+  ],
+  "python.analysis.include": [
+    "backend/pokemon-tcg-companion"
+  ],
+  "python.analysis.indexing": true,
+  "python.analysis.userFileIndexingLimit": 2000
 }

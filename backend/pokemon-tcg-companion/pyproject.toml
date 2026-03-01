@@ -57,6 +57,7 @@ dev = [
     "pyright>=1.1.0",
     "ruff>=0.15.0",
     "pytest-asyncio>=0.22.0",
+    "pytest-env>=1.0.0",
     "prefect>=3.6.17",
     "honcho>=2.0.0",
 ]

@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
-from cards.domain.models.card import Card
+from cards.domain.models import CardRead
 from cards.infrastructure.flows.match_card import FLOW_NAME
 from core import flows
 from core.auth import verify_pubsub_token
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/cards/webhooks", tags=["webhooks"])
 @router.post("/card-created", dependencies=[Depends(verify_pubsub_token)])
 async def handle_card_created(envelope: PubSubEnvelope):
     try:
-        payload = envelope.get_payload(Card)
+        payload = envelope.get_payload(CardRead)
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors()) from e
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import AsyncGenerator, Awaitable, Callable, TypeVar
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
@@ -19,7 +18,7 @@ _session_maker: async_sessionmaker | None = None
 T = TypeVar("T")
 
 
-def _normalize_async_url(url: str) -> str:
+def normalize_async_url(url: str) -> str:
     """Normalize a database URL to use asyncpg.
 
     Handles common cases when using hosted providers like Neon:
@@ -44,7 +43,7 @@ def _normalize_async_url(url: str) -> str:
 def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
-        url = _normalize_async_url(settings.database_url.get_secret_value())
+        url = normalize_async_url(settings.database_url.get_secret_value())
         _engine = create_async_engine(url, future=True, echo=False)
 
     return _engine

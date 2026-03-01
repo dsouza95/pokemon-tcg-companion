@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:3000"
     clerk_secret_key: SecretStr
     clerk_authorized_party: str = "http://localhost:3000"
-    database_url: SecretStr = SecretStr("sqlite+aiosqlite:///./test.db")
+    database_url: SecretStr
     default_agent_model: str = "google-gla:gemini-3-flash-preview"
     default_flow_retries: int = 3
     default_flow_retry_delay_seconds: int = 10
@@ -24,5 +24,6 @@ class Settings(BaseSettings):
     google_application_credentials_json: Optional[SecretStr] = None
     prefect_deployment: str = "default"
     log_level: str = "DEBUG"
+
 
 settings = Settings()  # type: ignore[call-arg] Pydantic fills the values in runtime

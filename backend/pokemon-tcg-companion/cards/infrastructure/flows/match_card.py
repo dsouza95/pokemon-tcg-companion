@@ -18,7 +18,7 @@ from cards.application.agents import (
     RefCardMatcher,
 )
 from cards.application.services import CardService, RefCardService
-from cards.domain.models import Card, CardUpdate, MatchingStatus, RefCard
+from cards.domain.models import CardRead, CardUpdate, MatchingStatus, RefCard
 from cards.infrastructure.repositories import CardRepository, RefCardRepository
 from core.db import with_session
 from core.flows import with_logfire
@@ -45,6 +45,7 @@ async def download_card(card_path: str) -> tuple[bytes, str]:
     blob = bucket.blob(card_path)
 
     return await asyncio.to_thread(blob.download_as_bytes), blob.content_type
+
 
 @task(
     retries=settings.default_flow_retries,
@@ -85,7 +86,9 @@ async def find_match_candidates(metadata: CardMetadata) -> list[RefCard]:
     retries=settings.default_flow_retries,
     retry_delay_seconds=settings.default_flow_retry_delay_seconds,
 )
-async def match_card(card_bytes: bytes, card_mimetype: str, candidates: list[RefCard]) -> RefCard:
+async def match_card(
+    card_bytes: bytes, card_mimetype: str, candidates: list[RefCard]
+) -> RefCard:
     agent = RefCardMatcher()
     result = await agent.run(
         [
@@ -119,7 +122,6 @@ async def _update_card_with_match(
         UUID(card_id),
         CardUpdate(ref_card_id=matched_card.id, matching_status=MatchingStatus.matched),
     )
-    await session.commit()
 
     return card
 
@@ -135,7 +137,7 @@ async def _update_card_with_failure(session: AsyncSession, card_id: str):
     retries=settings.default_flow_retries,
     retry_delay_seconds=settings.default_flow_retry_delay_seconds,
 )
-async def update_card_with_match(card_id: str, matched_card: RefCard) -> Card:
+async def update_card_with_match(card_id: str, matched_card: RefCard) -> CardRead:
     return await with_session(_update_card_with_match, card_id, matched_card)
 
 

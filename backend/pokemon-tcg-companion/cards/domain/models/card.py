@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from sqlmodel import AutoString, Field, Relationship, SQLModel
 
-from cards.domain.models.ref_card import RefCard, RefCardRead
+from cards.domain.models.ref_card import RefCard
 
 
 class MatchingStatus(str, enum.Enum):
@@ -39,7 +39,6 @@ class CardRead(SQLModel):
     user_id: str
     image_path: str
     matching_status: MatchingStatus
-    ref_card: Optional[RefCardRead] = None
 
 
 class CardAdd(CardBase):

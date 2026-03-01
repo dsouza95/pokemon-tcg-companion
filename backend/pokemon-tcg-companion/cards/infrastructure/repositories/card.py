@@ -6,11 +6,11 @@ from uuid import UUID
 
 from sqlalchemy import delete, desc, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import QueryableAttribute, selectinload
+from sqlalchemy.orm import QueryableAttribute
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
 
-from cards.domain.models import Card, CardAdd, CardUpdate
+from cards.domain.models import Card, CardAdd, CardRead, CardUpdate
 from cards.domain.repositories import AbstractCardRepository
 
 
@@ -18,24 +18,24 @@ class CardRepository(AbstractCardRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def add(self, card: CardAdd) -> Card:
+    async def add(self, card: CardAdd) -> CardRead:
         new_card = Card(**card.model_dump())
         self.session.add(new_card)
         await self.session.commit()
-        return new_card
+        return CardRead.model_validate(new_card)
 
-    async def get(self, id: UUID) -> Optional[Card]:
-        return await self.session.get(Card, id)
+    async def get(self, id: UUID) -> Optional[CardRead]:
+        card = await self.session.get(Card, id)
+        return CardRead.model_validate(card) if card else None
 
-    async def list(self) -> Sequence[Card]:
-        stmt = (
-            select(Card)
-            .options(selectinload(cast(QueryableAttribute, Card.ref_card)))
-            .order_by(desc(cast(QueryableAttribute, Card.ref_card_id).is_(None)))
+    async def list(self) -> Sequence[CardRead]:
+        stmt = select(Card).order_by(
+            desc(cast(QueryableAttribute, Card.ref_card_id).is_(None))
         )
-        return (await self.session.execute(stmt)).scalars().all()
+        cards = (await self.session.execute(stmt)).scalars().all()
+        return [CardRead.model_validate(card) for card in cards]
 
-    async def update(self, id: UUID, card: CardUpdate) -> Card:
+    async def update(self, id: UUID, card: CardUpdate) -> CardRead:
         values = card.model_dump(exclude_unset=True)
         stmt = (
             update(Card)
@@ -46,7 +46,7 @@ class CardRepository(AbstractCardRepository):
         result = await self.session.execute(stmt)
         updated_card = result.scalar_one()
         await self.session.commit()
-        return updated_card
+        return CardRead.model_validate(updated_card)
 
     async def delete(self, id: UUID) -> None:
         stmt = delete(Card).where(cast(ColumnElement[bool], Card.id == id))

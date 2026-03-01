@@ -108,6 +108,8 @@ export interface components {
              */
             id?: string;
         };
+        /** MatchingStatus */
+        MatchingStatus: "pending" | "matched" | "failed";
         /** CardRead */
         CardRead: {
             /**
@@ -121,6 +123,7 @@ export interface components {
             user_id: string;
             /** Image Path */
             image_path: string;
+            matching_status: components["schemas"]["MatchingStatus"];
             ref_card?: components["schemas"]["RefCardRead"] | null;
         };
         /** CreateCardPayload */

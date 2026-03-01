@@ -18,7 +18,7 @@ from cards.application.agents import (
     RefCardMatcher,
 )
 from cards.application.services import CardService, RefCardService
-from cards.domain.models import Card, CardUpdate, RefCard
+from cards.domain.models import Card, CardUpdate, MatchingStatus, RefCard
 from cards.infrastructure.repositories import CardRepository, RefCardRepository
 from core.db import with_session
 from core.flows import with_logfire
@@ -113,15 +113,22 @@ async def match_card(card_bytes: bytes, card_mimetype: str, candidates: list[Ref
 async def _update_card_with_match(
     session: AsyncSession, card_id: str, matched_card: RefCard
 ):
-    repo = CardRepository(session)
-    service = CardService(repo)
+    service = CardService(CardRepository(session))
 
     card = await service.update_card(
-        UUID(card_id), CardUpdate(ref_card_id=matched_card.id)
+        UUID(card_id),
+        CardUpdate(ref_card_id=matched_card.id, matching_status=MatchingStatus.matched),
     )
     await session.commit()
 
     return card
+
+
+async def _update_card_with_failure(session: AsyncSession, card_id: str):
+    service = CardService(CardRepository(session))
+    await service.update_card(
+        UUID(card_id), CardUpdate(matching_status=MatchingStatus.failed)
+    )
 
 
 @task(
@@ -135,18 +142,22 @@ async def update_card_with_match(card_id: str, matched_card: RefCard) -> Card:
 @flow(name=FLOW_NAME, log_prints=True)
 @with_logfire(pydantic_ai=True)
 async def match_card_flow(card_id: str, image_path: str):
-    card_bytes, card_mimetype = await download_card(image_path)
-    card_metadata = await extract_card_metadata(card_bytes, card_mimetype)
-    candidates = await find_match_candidates(card_metadata)
-    if len(candidates) == 0:
-        raise ValueError(
-            f"No candidates found for extracted metadata: "
-            f"name={card_metadata.name!r}, set_id={card_metadata.set_id!r}, "
-            f"tcg_local_id={card_metadata.tcg_local_id!r}"
-        )
+    try:
+        card_bytes, card_mimetype = await download_card(image_path)
+        card_metadata = await extract_card_metadata(card_bytes, card_mimetype)
+        candidates = await find_match_candidates(card_metadata)
+        if len(candidates) == 0:
+            raise ValueError(
+                f"No candidates found for extracted metadata: "
+                f"name={card_metadata.name!r}, set_id={card_metadata.set_id!r}, "
+                f"tcg_local_id={card_metadata.tcg_local_id!r}"
+            )
 
-    matched_ref_card = await match_card(card_bytes, card_mimetype, candidates)
-    card = await update_card_with_match(card_id, matched_ref_card)
+        matched_ref_card = await match_card(card_bytes, card_mimetype, candidates)
+        card = await update_card_with_match(card_id, matched_ref_card)
+    except Exception:
+        await with_session(_update_card_with_failure, card_id)
+        raise
 
     return {
         "card": card.model_dump(),

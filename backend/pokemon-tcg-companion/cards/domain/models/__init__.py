@@ -1,4 +1,4 @@
-from .card import Card, CardAdd, CardRead, CardUpdate
+from .card import Card, CardAdd, CardRead, CardUpdate, MatchingStatus
 from .ref_card import RefCard, RefCardAdd, RefCardRead, RefCardUpdate
 
 __all__ = [
@@ -10,4 +10,5 @@ __all__ = [
     "CardAdd",
     "CardRead",
     "CardUpdate",
+    "MatchingStatus",
 ]

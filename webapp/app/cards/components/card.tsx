@@ -20,9 +20,19 @@ export function Card({
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  if (!card.ref_card) {
-    return <CardSkeleton />;
+  if (card.matching_status === "failed") {
+    return (
+      <div className="group flex flex-col gap-2">
+        <div className="bg-destructive/10 text-destructive relative flex aspect-[2.5/3.5] flex-col items-center justify-center rounded-sm">
+          <DeleteCardButton cardId={card.id} />
+          <p className="text-xs font-medium">Failed to match card</p>
+        </div>
+        <div className="h-5" />
+      </div>
+    );
   }
+
+  if (!card.ref_card) return <CardSkeleton />;
 
   return (
     <div className="group relative flex cursor-pointer flex-col gap-2">

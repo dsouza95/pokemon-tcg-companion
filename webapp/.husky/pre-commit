@@ -1,1 +1,2 @@
-cd webapp && pnpm exec lint-staged && pnpm tsc --noEmit
+(cd webapp && pnpm exec lint-staged && pnpm tsc --noEmit)
+uv run --directory backend/pokemon-tcg-companion pre-commit run

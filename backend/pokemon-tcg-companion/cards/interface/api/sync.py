@@ -23,7 +23,7 @@ def _get_electric_connection_url(request: Request, table_name: str):
 
 def _get_headers(request: Request) -> dict:
     # Only forward specific headers to avoid Electric rejection
-    allowed_headers = ["accept", "if-none-match"]
+    allowed_headers = ["accept", "if-none-match", "if-modified-since"]
     return {k: v for k, v in request.headers.items() if k.lower() in allowed_headers}
 
 
@@ -53,6 +53,9 @@ async def sync_proxy(request: Request, table_name: str):
             "electric-schema",
             "electric-cursor",
             "electric-up-to-date",
+            "cache-control",
+            "etag",
+            "last-modified",
         ]
         if h in response.headers
     }

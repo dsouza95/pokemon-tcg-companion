@@ -60,3 +60,17 @@ export function useCreateCard() {
     },
   });
 }
+
+export function useDeleteCard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (cardId: string) => {
+      const res = await fetch(`/api/cards/${cardId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete card");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cards"] });
+    },
+  });
+}

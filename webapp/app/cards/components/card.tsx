@@ -7,6 +7,7 @@ import type { components } from "@/lib/openapi-types";
 import { cn } from "@/lib/utils";
 
 import { CardSkeleton } from "./card-skeleton";
+import { DeleteCardButton } from "./delete-card-button";
 
 type CardRead = components["schemas"]["CardRead"];
 
@@ -31,6 +32,7 @@ export function Card({
           !imageLoaded && "animate-pulse",
         )}
       >
+        <DeleteCardButton cardId={card.id} />
         {card.ref_card.image_url && (
           <Image
             src={card.ref_card.image_url}

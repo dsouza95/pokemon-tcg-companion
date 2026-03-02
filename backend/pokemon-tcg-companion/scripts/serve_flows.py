@@ -12,7 +12,7 @@ from typing import cast
 from prefect import serve
 from prefect.deployments.runner import RunnerDeployment
 
-from core.settings import settings
+from core.settings.prefect import settings
 from flows import FLOWS
 
 

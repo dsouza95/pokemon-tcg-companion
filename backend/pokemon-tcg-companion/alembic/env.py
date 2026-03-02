@@ -8,7 +8,7 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from core.db import normalize_async_url
-from core.settings import settings
+from core.settings.db import settings
 
 config = context.config
 config.set_main_option(

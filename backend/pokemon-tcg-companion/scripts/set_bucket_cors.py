@@ -1,6 +1,6 @@
 from google.cloud import storage
 
-from core.settings import settings
+from core.settings.app import settings
 
 client = storage.Client()
 bucket = client.bucket(settings.gcp_bucket)

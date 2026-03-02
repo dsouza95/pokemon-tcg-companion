@@ -17,7 +17,7 @@ from cards.infrastructure.repositories import CardRepository
 from core.auth import require_auth
 from core.db import get_db
 from core.gcp import get_publisher, get_storage_client
-from core.settings import settings
+from core.settings.app import settings
 
 router = APIRouter(
     prefix="/cards",

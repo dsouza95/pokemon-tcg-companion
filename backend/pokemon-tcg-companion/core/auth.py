@@ -8,7 +8,7 @@ from fastapi import Header, HTTPException, Request
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 
-from core.settings import settings
+from core.settings.app import settings
 
 logger = logging.getLogger(__name__)
 

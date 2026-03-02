@@ -22,7 +22,7 @@ from cards.domain.models import CardRead, CardUpdate, MatchingStatus, RefCard
 from cards.infrastructure.repositories import CardRepository, RefCardRepository
 from core.db import with_session
 from core.flows import with_logfire
-from core.settings import settings
+from core.settings.prefect import settings
 
 FLOW_NAME = "match_card_flow"
 

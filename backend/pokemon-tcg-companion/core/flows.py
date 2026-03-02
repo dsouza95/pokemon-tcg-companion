@@ -7,7 +7,7 @@ import logfire
 from prefect.deployments import arun_deployment, run_deployment
 
 from core.logfire import setup_logfire
-from core.settings import settings
+from core.settings.prefect import settings
 
 
 def get_deployment_name(flow_name: str) -> str:

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from google.cloud import pubsub_v1, storage
 from google.oauth2 import service_account
 
-from core.settings import settings
+from core.settings.app import settings
 
 
 def _get_gcp_credentials() -> service_account.Credentials | None:

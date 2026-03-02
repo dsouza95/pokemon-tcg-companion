@@ -16,7 +16,7 @@ import argparse
 
 from google.cloud import pubsub_v1
 
-from core.settings import settings
+from core.settings.app import settings
 
 
 def create_topic_and_subscription(

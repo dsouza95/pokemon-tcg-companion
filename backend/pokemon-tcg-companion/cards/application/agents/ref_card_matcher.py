@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 from pydantic_ai import Agent
 
-from core.settings import settings
+from core.settings.agents import settings
 
 
 class MatchResult(BaseModel):
@@ -13,9 +13,9 @@ class MatchResult(BaseModel):
 class RefCardMatcher(Agent[None, MatchResult]):
     """Agent for matching a card image to one of the existing reference cards."""
 
-    def __init__(self):
+    def __init__(self, model: str = settings.default_agent_model):
         super().__init__(
-            settings.default_agent_model,
+            model,
             output_type=MatchResult,
             system_prompt=(
                 "You are a helpful assistant for matching a Pokemon TCG card image to one of the existing reference cards. "

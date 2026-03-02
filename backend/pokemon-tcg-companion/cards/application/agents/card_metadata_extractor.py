@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator
 from pydantic_ai import Agent
 
-from core.settings import settings
+from core.settings.agents import settings
 
 
 class CardMetadata(BaseModel):
@@ -19,9 +19,9 @@ class CardMetadata(BaseModel):
 class CardMetadataExtractor(Agent[None, CardMetadata]):
     """Agent for extracting structured metadata from a card image."""
 
-    def __init__(self):
+    def __init__(self, model: str = settings.default_agent_model):
         super().__init__(
-            settings.default_agent_model,
+            model,
             output_type=CardMetadata,
             system_prompt=(
                 "You are a helpful assistant for extracting structured metadata from a Pokemon TCG card image. "

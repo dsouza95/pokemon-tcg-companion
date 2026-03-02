@@ -4,7 +4,7 @@ from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
 
 from core.auth import require_auth
-from core.settings import settings
+from core.settings.app import settings
 
 router = APIRouter(dependencies=[Depends(require_auth)])
 SYNC_PROXY_TIMEOUT = 20.0

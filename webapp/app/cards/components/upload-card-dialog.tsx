@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -50,6 +51,7 @@ export function UploadCardDialog({
   }
 
   function handleClose(open: boolean) {
+    if (isUploading) return;
     if (!open) {
       setImageFile(null);
       setPreview(null);
@@ -74,6 +76,9 @@ export function UploadCardDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Card</DialogTitle>
+          <DialogDescription>
+            Upload an image of your Pokémon card to add it to your collection.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -93,12 +98,25 @@ export function UploadCardDialog({
             onDrop={handleDrop}
           >
             {preview ? (
-              // eslint-disable-next-line @next/next/no-img-element -- blob URL from local file, not optimizable by next/image
-              <img
-                src={preview}
-                alt="Card preview"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element -- blob URL from local file, not optimizable by next/image */}
+                <img
+                  src={preview}
+                  alt="Card preview"
+                  className={cn(
+                    "absolute inset-0 h-full w-full object-cover transition-opacity duration-200",
+                    isUploading && "opacity-40",
+                  )}
+                />
+                {isUploading && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    <div className="border-foreground size-6 animate-spin rounded-full border-2 border-t-transparent" />
+                    <span className="text-foreground text-xs font-medium">
+                      Uploading…
+                    </span>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-muted-foreground flex flex-col items-center gap-1.5 px-2 text-center">
                 <HugeiconsIcon

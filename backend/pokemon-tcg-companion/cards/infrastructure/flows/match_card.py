@@ -12,11 +12,7 @@ from pydantic_ai import BinaryContent
 from pydantic_ai.models.google import GoogleModelSettings
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from cards.application.agents import (
-    CardMetadata,
-    CardMetadataExtractor,
-    RefCardMatcher,
-)
+from cards.application.agents import CardMatcherAgentDeps, card_matcher_agent
 from cards.application.services import CardService, RefCardService
 from cards.domain.models import CardRead, CardUpdate, MatchingStatus, RefCard
 from cards.infrastructure.repositories import CardRepository, RefCardRepository
@@ -47,70 +43,35 @@ async def download_card(card_path: str) -> tuple[bytes, str]:
     return await asyncio.to_thread(blob.download_as_bytes), blob.content_type
 
 
-@task(
-    retries=settings.default_flow_retries,
-    retry_delay_seconds=settings.default_flow_retry_delay_seconds,
-)
-async def extract_card_metadata(card_bytes: bytes, card_mimetype: str) -> CardMetadata:
-    agent = CardMetadataExtractor()
-    result = await agent.run(
-        [
-            "Extract metadata from the following pokémon card:",
-            BinaryContent(data=card_bytes, media_type=card_mimetype),
-        ],
-        model_settings=GoogleModelSettings(
-            google_thinking_config={"include_thoughts": True}
-        ),
-    )
-
-    return result.output
-
-
-@task(
-    retries=settings.default_flow_retries,
-    retry_delay_seconds=settings.default_flow_retry_delay_seconds,
-)
-async def find_match_candidates(metadata: CardMetadata) -> list[RefCard]:
-    async def _query(session: AsyncSession) -> list[RefCard]:
-        service = RefCardService(RefCardRepository(session))
-        return await service.find_match_candidates(
-            name=metadata.name,
-            year=metadata.year,
-            local_id=metadata.tcg_local_id,
-        )
-
-    return await with_session(_query)
-
-
-@task(
-    retries=settings.default_flow_retries,
-    retry_delay_seconds=settings.default_flow_retry_delay_seconds,
-)
-async def match_card(
-    card_bytes: bytes, card_mimetype: str, candidates: list[RefCard]
+async def _run_card_matcher_agent(
+    session: AsyncSession, card_bytes: bytes, card_mimetype: str
 ) -> RefCard:
-    agent = RefCardMatcher()
-    result = await agent.run(
+    result = await card_matcher_agent.run(
         [
-            "Match the provided pokémon card to one of the candidates:\n",
-            f"Candidates: {[c.model_dump(mode='json') for c in candidates]}\n",
-            "Image: ",
+            "Match the provided Pokémon card image to one of the reference cards:",
             BinaryContent(data=card_bytes, media_type=card_mimetype),
         ],
+        deps=CardMatcherAgentDeps(session=session),
         model_settings=GoogleModelSettings(
             google_thinking_config={"include_thoughts": True}
         ),
     )
 
-    candidates_by_id = {c.id: c for c in candidates}
-    matched = candidates_by_id.get(result.output.id)
+    service = RefCardService(RefCardRepository(session))
+    matched = await service.get_card(result.output.id)
     if matched is None:
         raise ValueError(
-            f"Agent returned id {result.output.id!r} which is not among the candidate ids: "
-            f"{list(candidates_by_id)}"
+            f"Agent returned id {result.output.id!r} which does not exist in the database"
         )
-
     return matched
+
+
+@task(
+    retries=settings.default_flow_retries,
+    retry_delay_seconds=settings.default_flow_retry_delay_seconds,
+)
+async def run_card_matcher_agent(card_bytes: bytes, card_mimetype: str) -> RefCard:
+    return await with_session(_run_card_matcher_agent, card_bytes, card_mimetype)
 
 
 async def _update_card_with_match(
@@ -146,16 +107,7 @@ async def update_card_with_match(card_id: str, matched_card: RefCard) -> CardRea
 async def match_card_flow(card_id: str, image_path: str):
     try:
         card_bytes, card_mimetype = await download_card(image_path)
-        card_metadata = await extract_card_metadata(card_bytes, card_mimetype)
-        candidates = await find_match_candidates(card_metadata)
-        if len(candidates) == 0:
-            raise ValueError(
-                f"No candidates found for extracted metadata: "
-                f"name={card_metadata.name!r}, year={card_metadata.year!r}, "
-                f"tcg_local_id={card_metadata.tcg_local_id!r}"
-            )
-
-        matched_ref_card = await match_card(card_bytes, card_mimetype, candidates)
+        matched_ref_card = await run_card_matcher_agent(card_bytes, card_mimetype)
         card = await update_card_with_match(card_id, matched_ref_card)
     except Exception:
         await with_session(_update_card_with_failure, card_id)
@@ -163,7 +115,6 @@ async def match_card_flow(card_id: str, image_path: str):
 
     return {
         "card": card.model_dump(),
-        "candidates": [c.model_dump() for c in candidates],
         "matched_ref_card": matched_ref_card.model_dump(),
     }
 

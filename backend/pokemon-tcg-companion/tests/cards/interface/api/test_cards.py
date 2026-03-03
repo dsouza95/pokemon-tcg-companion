@@ -7,25 +7,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
 import pytest
+from pydantic_ai.exceptions import UnexpectedModelBehavior
 
-from cards.application.agents.card_metadata_extractor import CardMetadata
-from cards.application.agents.ref_card_matcher import MatchResult
+from cards.application.agents.card_matcher import MatchResult, card_matcher_agent
 from cards.application.services import CardService
 from cards.domain.models import CardAdd, CardRead, MatchingStatus
 from cards.infrastructure.repositories import CardRepository
-from tests.utils.mocks import create_mock_agent, create_mock_storage_client
+from tests.utils.mocks import create_mock_storage_client
 from tests.utils.pubsub import create_pubsub_message
-
-
-@pytest.fixture
-def mock_card_metadata_agent():
-    metadata = CardMetadata(name="Charizard", tcg_local_id="4", year=1999)
-    mock_agent_class, _ = create_mock_agent(metadata)
-    with patch(
-        "cards.infrastructure.flows.match_card.CardMetadataExtractor",
-        mock_agent_class,
-    ):
-        yield mock_agent_class
 
 
 @pytest.fixture
@@ -146,7 +135,6 @@ class TestCardsAPI:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.usefixtures("mock_storage_with_card_image")
-    @pytest.mark.usefixtures("mock_card_metadata_agent")
     @pytest.mark.usefixtures("prefect_flow")
     async def test_card_match(
         self,
@@ -156,14 +144,13 @@ class TestCardsAPI:
         ref_card,
     ):
         """Full E2E: card created → Pub/Sub webhook → match_card flow → card matched.
-        Agents are mocked to prevent calling providers
+        Agent is mocked to prevent calling providers.
         """
-        matcher_result = MatchResult(id=ref_card.id)
-        mock_matcher_class, _ = create_mock_agent(matcher_result)
+        mock_result = MagicMock()
+        mock_result.output = MatchResult(id=ref_card.id)
 
-        with patch(
-            "cards.infrastructure.flows.match_card.RefCardMatcher",
-            mock_matcher_class,
+        with patch.object(
+            card_matcher_agent, "run", AsyncMock(return_value=mock_result)
         ):
             # Step 1: Create the card via the API
             create_response = await client.post(
@@ -200,19 +187,14 @@ class TestCardsAPI:
     @pytest.mark.usefixtures("mock_publisher")
     @pytest.mark.usefixtures("mock_storage_with_card_image")
     @pytest.mark.usefixtures("prefect_flow")
-    async def test_card_matching_fails_when_metadata_extractor_hallucinates(
+    async def test_card_matching_fails_with_unexpected_model_behavior(
         self, session, client
     ):
-        """Card matching fails gracefully when the extraction hallucinates non-existent metadata (no candidates)."""
-        # Mock metadata extractor to return a card that doesn't exist in the DB
-        hallucinated_metadata = CardMetadata(
-            name="Hallucinated Card", tcg_local_id="9999", year=0
-        )
-        mock_extractor_class, _ = create_mock_agent(hallucinated_metadata)
-
-        with patch(
-            "cards.infrastructure.flows.match_card.CardMetadataExtractor",
-            mock_extractor_class,
+        """Card matching fails gracefully when model raises UnexpectedModelBehavior (i.e. failed to find any candidates with tool)."""
+        with patch.object(
+            card_matcher_agent,
+            "run",
+            AsyncMock(side_effect=UnexpectedModelBehavior("Retry limit reached")),
         ):
             # Step 1: Create the card
             create_response = await client.post(
@@ -226,7 +208,7 @@ class TestCardsAPI:
             card_payload = CardRead.model_validate(create_response.json())
             pubsub_message = create_pubsub_message(payload=card_payload)
 
-            with pytest.raises(ValueError, match="No candidates found"):
+            with pytest.raises(UnexpectedModelBehavior):
                 await client.post(
                     "/cards/webhooks/card-created",
                     json=pubsub_message.model_dump(by_alias=True),
@@ -243,18 +225,15 @@ class TestCardsAPI:
     @pytest.mark.integration
     @pytest.mark.usefixtures("mock_publisher")
     @pytest.mark.usefixtures("mock_storage_with_card_image")
-    @pytest.mark.usefixtures("mock_card_metadata_agent")
     @pytest.mark.usefixtures("prefect_flow")
     @pytest.mark.usefixtures("ref_card")
     async def test_card_matching_fails_when_matcher_hallucinates(self, session, client):
-        """Card matching fails gracefully when the matcher returns an ID not in the candidates list."""
-        # Mock matcher to return an ID that is not ref_card.id
-        hallucinated_match = MatchResult(id=uuid4())
-        mock_matcher_class, _ = create_mock_agent(hallucinated_match)
+        """Card matching fails gracefully when the agent returns an ID not in the database."""
+        mock_result = MagicMock()
+        mock_result.output = MatchResult(id=uuid4())
 
-        with patch(
-            "cards.infrastructure.flows.match_card.RefCardMatcher",
-            mock_matcher_class,
+        with patch.object(
+            card_matcher_agent, "run", AsyncMock(return_value=mock_result)
         ):
             create_response = await client.post(
                 "/cards",
@@ -265,7 +244,7 @@ class TestCardsAPI:
             card_payload = CardRead.model_validate(create_response.json())
             pubsub_message = create_pubsub_message(payload=card_payload)
 
-            with pytest.raises(ValueError, match="not among the candidate ids"):
+            with pytest.raises(ValueError, match="does not exist in the database"):
                 await client.post(
                     "/cards/webhooks/card-created",
                     json=pubsub_message.model_dump(by_alias=True),
@@ -282,17 +261,12 @@ class TestCardsAPI:
     @pytest.mark.usefixtures("mock_publisher")
     @pytest.mark.usefixtures("mock_storage_with_card_image")
     @pytest.mark.usefixtures("prefect_flow")
-    async def test_card_matching_fails_on_metadata_agent_error(self, session, client):
-        """Card matching fails gracefully when the metadata extractor agent raises an error (e.g. invalid response format)."""
-        # Mock metadata extractor to raise an exception
-        mock_extractor_class = MagicMock()
-        mock_extractor_instance = AsyncMock()
-        mock_extractor_instance.run.side_effect = ValueError("Simulated LLM error")
-        mock_extractor_class.return_value = mock_extractor_instance
-
-        with patch(
-            "cards.infrastructure.flows.match_card.CardMetadataExtractor",
-            mock_extractor_class,
+    async def test_card_matching_fails_on_agent_error(self, session, client):
+        """Card matching fails gracefully when the agent raises an error (e.g. invalid response format)."""
+        with patch.object(
+            card_matcher_agent,
+            "run",
+            AsyncMock(side_effect=ValueError("Simulated LLM error")),
         ):
             create_response = await client.post(
                 "/cards",
@@ -313,51 +287,6 @@ class TestCardsAPI:
             updated_card = await svc.get_card(UUID(card_id))
             assert updated_card is not None
             assert updated_card.matching_status == MatchingStatus.failed
-
-    @pytest.mark.asyncio
-    @pytest.mark.integration
-    @pytest.mark.usefixtures("mock_publisher")
-    @pytest.mark.usefixtures("mock_storage_with_card_image")
-    @pytest.mark.usefixtures("mock_card_metadata_agent")
-    @pytest.mark.usefixtures("ref_card")
-    @pytest.mark.usefixtures("prefect_flow")
-    async def test_card_matching_fails_on_matcher_agent_error(
-        self,
-        session,
-        client,
-    ):
-        """Card matching fails gracefully when the matcher agent raises an error (e.g. invalid response format)."""
-        mock_matcher_class = MagicMock()
-        mock_matcher_instance = AsyncMock()
-        mock_matcher_instance.run.side_effect = ValueError(
-            "Simulated matcher LLM error"
-        )
-        mock_matcher_class.return_value = mock_matcher_instance
-
-        with patch(
-            "cards.infrastructure.flows.match_card.RefCardMatcher",
-            mock_matcher_class,
-        ):
-            create_response = await client.post(
-                "/cards",
-                json={"image_path": "cards/test-matcher-agent-error.jpg"},
-            )
-            card_id = create_response.json()["id"]
-
-            card_payload = CardRead.model_validate(create_response.json())
-            pubsub_message = create_pubsub_message(payload=card_payload)
-
-            with pytest.raises(ValueError, match="Simulated matcher LLM error"):
-                await client.post(
-                    "/cards/webhooks/card-created",
-                    json=pubsub_message.model_dump(by_alias=True),
-                )
-
-            svc = CardService(CardRepository(session))
-            updated_card = await svc.get_card(UUID(card_id))
-            assert updated_card is not None
-            assert updated_card.matching_status == MatchingStatus.failed
-            assert updated_card.ref_card_id is None
 
 
 @pytest.mark.asyncio

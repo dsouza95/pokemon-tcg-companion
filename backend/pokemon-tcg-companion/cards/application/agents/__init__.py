@@ -1,9 +1,7 @@
-from .card_metadata_extractor import CardMetadata, CardMetadataExtractor
-from .ref_card_matcher import MatchResult, RefCardMatcher
+from .card_matcher import CardMatcherAgentDeps, MatchResult, card_matcher_agent
 
 __all__ = [
-    "CardMetadataExtractor",
-    "CardMetadata",
-    "RefCardMatcher",
+    "CardMatcherAgentDeps",
     "MatchResult",
+    "card_matcher_agent",
 ]

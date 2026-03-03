@@ -238,183 +238,6 @@
         }
       }
     },
-    "/sync/{table_name}": {
-      "patch": {
-        "summary": "Sync Proxy",
-        "operationId": "sync_proxy_sync__table_name__patch",
-        "parameters": [
-          {
-            "name": "table_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Table Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Sync Proxy",
-        "operationId": "sync_proxy_sync__table_name__patch",
-        "parameters": [
-          {
-            "name": "table_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Table Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Sync Proxy",
-        "operationId": "sync_proxy_sync__table_name__patch",
-        "parameters": [
-          {
-            "name": "table_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Table Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "summary": "Sync Proxy",
-        "operationId": "sync_proxy_sync__table_name__patch",
-        "parameters": [
-          {
-            "name": "table_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Table Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Sync Proxy",
-        "operationId": "sync_proxy_sync__table_name__patch",
-        "parameters": [
-          {
-            "name": "table_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Table Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/": {
       "get": {
         "summary": "Root",
@@ -666,6 +489,89 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "RefCardRead": {
+        "properties": {
+          "tcg_id": {
+            "title": "Tcg Id",
+            "type": "string"
+          },
+          "tcg_local_id": {
+            "title": "Tcg Local Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Image Url"
+          },
+          "set_id": {
+            "format": "uuid",
+            "title": "Set Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tcg_id",
+          "tcg_local_id",
+          "name",
+          "set_id",
+          "id"
+        ],
+        "title": "RefCardRead",
+        "type": "object"
+      },
+      "TcgSetRead": {
+        "properties": {
+          "tcg_id": {
+            "title": "Tcg Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Year"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tcg_id",
+          "name",
+          "id"
+        ],
+        "title": "TcgSetRead",
+        "type": "object"
       }
     }
   }

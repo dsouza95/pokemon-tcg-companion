@@ -50,7 +50,8 @@ export interface paths {
         get: operations["get_card_cards__card_id__get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Delete Card */
+        delete: operations["delete_card_cards__card_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -107,9 +108,9 @@ export interface components {
              * Format: uuid
              */
             id?: string;
+            /** @default pending */
+            matching_status: components["schemas"]["MatchingStatus"];
         };
-        /** MatchingStatus */
-        MatchingStatus: "pending" | "matched" | "failed";
         /** CardRead */
         CardRead: {
             /**
@@ -118,13 +119,12 @@ export interface components {
              */
             id: string;
             /** Ref Card Id */
-            ref_card_id?: string | null;
+            ref_card_id: string | null;
             /** User Id */
             user_id: string;
             /** Image Path */
             image_path: string;
             matching_status: components["schemas"]["MatchingStatus"];
-            ref_card?: components["schemas"]["RefCardRead"] | null;
         };
         /** CreateCardPayload */
         CreateCardPayload: {
@@ -143,6 +143,11 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * MatchingStatus
+         * @enum {string}
+         */
+        MatchingStatus: "pending" | "matched" | "failed";
         /**
          * PubSubEnvelope
          * @description Pub/Sub push subscription envelope.
@@ -164,26 +169,6 @@ export interface components {
             /** Publishtime */
             publishTime: string;
         };
-        /** RefCardRead */
-        RefCardRead: {
-            /** Tcg Id */
-            tcg_id: string;
-            /** Tcg Local Id */
-            tcg_local_id: string;
-            /** Name */
-            name: string;
-            /** Image Url */
-            image_url?: string | null;
-            /** Set Id */
-            set_id: string;
-            /** Set Name */
-            set_name: string;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-        };
         /** UploadUrlResponse */
         UploadUrlResponse: {
             /** Upload Url */
@@ -203,6 +188,47 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** RefCardRead */
+        RefCardRead: {
+            /** Tcg Id */
+            tcg_id: string;
+            /** Tcg Local Id */
+            tcg_local_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Image Url
+             * @default null
+             */
+            image_url: string | null;
+            /**
+             * Set Id
+             * Format: uuid
+             */
+            set_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
+        /** TcgSetRead */
+        TcgSetRead: {
+            /** Tcg Id */
+            tcg_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Year
+             * @default null
+             */
+            year: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
         };
     };
     responses: never;
@@ -316,8 +342,37 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Card"];
+                    "application/json": components["schemas"]["CardRead"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_card_cards__card_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -333,7 +388,9 @@ export interface operations {
     handle_card_created_cards_webhooks_card_created_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string;
+            };
             path?: never;
             cookie?: never;
         };

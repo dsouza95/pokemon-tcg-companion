@@ -6,6 +6,7 @@ from core.auth import require_auth
 from core.logfire import setup_logfire
 from core.settings.app import settings
 from lifespan import lifespan
+from openapi import bind as bind_openapi
 
 app = FastAPI(title="Pokémon TCG Companion", lifespan=lifespan)
 setup_logfire(fastapi_app=app)
@@ -28,6 +29,7 @@ app.add_middleware(
 )
 
 app.include_router(cards_router)
+app.openapi = bind_openapi(app)  # type: ignore[method-assign]
 
 
 @app.get("/", dependencies=[Depends(require_auth)])

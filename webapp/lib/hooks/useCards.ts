@@ -7,6 +7,11 @@ import { cardsCollection, refcardsCollection } from "@/lib/db";
 import type { components } from "@/lib/openapi-types";
 
 type CardRead = components["schemas"]["CardRead"];
+type RefCardRead = components["schemas"]["RefCardRead"];
+
+export type CardWithRefCard = CardRead & {
+  ref_card?: RefCardRead | null;
+};
 
 export function useCards() {
   const { data, isLoading, isError } = useLiveQuery(

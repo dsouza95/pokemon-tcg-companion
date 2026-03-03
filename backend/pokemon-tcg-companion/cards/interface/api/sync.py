@@ -28,7 +28,9 @@ def _get_headers(request: Request) -> dict:
 
 
 @router.api_route(
-    "/sync/{table_name}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
+    "/sync/{table_name}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    include_in_schema=False,
 )
 async def sync_proxy(request: Request, table_name: str):
     url = _get_electric_connection_url(request, table_name)

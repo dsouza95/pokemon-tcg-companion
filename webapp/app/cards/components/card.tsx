@@ -3,19 +3,17 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import type { components } from "@/lib/openapi-types";
+import type { CardWithRefCard } from "@/lib/hooks/useCards";
 import { cn } from "@/lib/utils";
 
 import { CardSkeleton } from "./card-skeleton";
 import { DeleteCardButton } from "./delete-card-button";
 
-type CardRead = components["schemas"]["CardRead"];
-
 export function Card({
   card,
   onImageLoad,
 }: {
-  card: CardRead;
+  card: CardWithRefCard;
   onImageLoad?: () => void;
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);

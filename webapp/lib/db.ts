@@ -10,7 +10,6 @@ const getBaseUrl = () => {
   return "";
 };
 
-// Initialize the cards collection
 export const cardsCollection = new CollectionImpl<
   components["schemas"]["CardRead"]
 >({
@@ -22,7 +21,6 @@ export const cardsCollection = new CollectionImpl<
   }),
 });
 
-// Initialize the refcards collection
 export const refcardsCollection = new CollectionImpl<
   components["schemas"]["RefCardRead"]
 >({
@@ -30,6 +28,17 @@ export const refcardsCollection = new CollectionImpl<
     getKey: (rc) => rc.id as string,
     shapeOptions: {
       url: `${getBaseUrl()}/api/sync/refcard`,
+    },
+  }),
+});
+
+export const tcgSetsCollection = new CollectionImpl<
+  components["schemas"]["TcgSetRead"]
+>({
+  ...electricCollectionOptions({
+    getKey: (s) => s.id,
+    shapeOptions: {
+      url: `${getBaseUrl()}/api/sync/tcgset`,
     },
   }),
 });

@@ -3,7 +3,11 @@
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { cardsCollection, refcardsCollection } from "@/lib/db";
+import {
+  cardsCollection,
+  refcardsCollection,
+  tcgSetsCollection,
+} from "@/lib/db";
 import type { components } from "@/lib/openapi-types";
 
 type CardRead = components["schemas"]["CardRead"];
@@ -21,7 +25,9 @@ export function useCards() {
         .leftJoin({ rc: refcardsCollection }, ({ c, rc }) =>
           eq(c.ref_card_id, rc.id),
         )
+        .leftJoin({ s: tcgSetsCollection }, ({ rc, s }) => eq(rc?.set_id, s.id))
         .orderBy(({ rc }) => rc?.name, "asc")
+        .orderBy(({ s }) => s?.year, "asc")
         .select(({ c, rc }) => ({
           ...c,
           ref_card: rc,
